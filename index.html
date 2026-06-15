@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -239,12 +239,12 @@
         </div>
       </div>
       <div class="status">
-        <div><span class="dot"></span><b>SYSTEME ONLINE</b></div>
+        <div><span class="dot"></span><b>SYSTEMS ONLINE</b></div>
         <div id="clock">--:--:--</div>
       </div>
     </header>
 
-    <div class="seclabel">Werkzeuge</div>
+    <div class="seclabel">Tools</div>
     <div class="grid">
 
       <a class="card live" href="https://potsdam-media.de/leads/">
@@ -257,8 +257,8 @@
           <span class="badge on">Live</span>
         </div>
         <h3>Call Tracker</h3>
-        <p>Lead-Finder und Anruf-Tracking fuer die Kalt-Akquise. Liste abarbeiten, Ergebnisse loggen.</p>
-        <span class="go">Oeffnen &rarr;</span>
+        <p>Lead finder and call tracking for cold outreach. Work the list, log every result.</p>
+        <span class="go">Open &rarr;</span>
       </a>
 
       <a class="card live" href="#schedule">
@@ -272,9 +272,9 @@
           </div>
           <span class="badge on">Live</span>
         </div>
-        <h3>Terminplaner</h3>
-        <p>Geteilter Kalender. Hier bucht die Cold-Callerin die Demo-Termine, Zeitzonen und Erinnerungen automatisch.</p>
-        <span class="go">Zum Kalender &rarr;</span>
+        <h3>Scheduler</h3>
+        <p>Shared calendar. Your cold caller books demo slots here, time zones and reminders handled automatically.</p>
+        <span class="go">Open calendar &rarr;</span>
       </a>
 
       <div class="card soon">
@@ -284,10 +284,10 @@
               <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
             </svg>
           </div>
-          <span class="badge off">Bald</span>
+          <span class="badge off">Soon</span>
         </div>
         <h3>Lead Finder</h3>
-        <p>Qualifizierte US-Handwerksbetriebe finden und in die Anruf-Liste schieben.</p>
+        <p>Find qualified US home service businesses and push them into the call list.</p>
       </div>
 
       <div class="card soon">
@@ -297,10 +297,10 @@
               <path d="M12 20V10M18 20V4M6 20v-4"/>
             </svg>
           </div>
-          <span class="badge off">Bald</span>
+          <span class="badge off">Soon</span>
         </div>
         <h3>Pipeline</h3>
-        <p>Eine Quelle der Wahrheit: angerufen, gebucht, demot, geschlossen, live.</p>
+        <p>One source of truth: called, booked, demoed, closed, live.</p>
       </div>
 
       <div class="card soon">
@@ -310,15 +310,15 @@
               <path d="M4 4h16v12H5.2L4 18z"/><path d="M8 9h8M8 12h5"/>
             </svg>
           </div>
-          <span class="badge off">Bald</span>
+          <span class="badge off">Soon</span>
         </div>
         <h3>Demo Studio</h3>
-        <p>Die KI-Empfang-Demo, die in Calls live aufs Handy des Interessenten textet.</p>
+        <p>The AI receptionist demo that texts the prospect live during a call.</p>
       </div>
 
     </div>
 
-    <div class="seclabel" id="schedule">Terminplaner</div>
+    <div class="seclabel" id="schedule">Scheduler</div>
     <div class="panel">
       <div class="panel-head">
         <div class="icon">
@@ -328,40 +328,40 @@
           </svg>
         </div>
         <div>
-          <h3>Demo-Termine</h3>
-          <div class="hint">Geteilt mit der Cold-Callerin. Buchungen landen automatisch in deinem Kalender.</div>
+          <h3>Demo Bookings</h3>
+          <div class="hint">Shared with your cold caller. Bookings land automatically in your calendar.</div>
         </div>
       </div>
 
       <div id="cal-inline"></div>
 
       <div class="connect" id="cal-connect">
-        <h4>Kalender noch nicht verbunden</h4>
-        <p>Sobald dein Cal.com-Link drinsteht, erscheint hier der eingebettete Buchungskalender. So aktivierst du ihn:</p>
+        <h4>Calendar not connected yet</h4>
+        <p>Once your Cal.com link is set, the embedded booking calendar shows up here. To activate it:</p>
         <ol class="steps">
-          <li>Kostenloses Konto auf <b>cal.com</b> anlegen</li>
-          <li>Event-Typ <b>"15 Min Demo"</b> erstellen, Cold-Callerin als Mit-Bearbeiterin einladen</li>
-          <li>Deinen Link (z.B. <code>homeservicereply/demo</code>) Claude geben</li>
-          <li>Claude setzt <code>CAL_LINK</code> und der Kalender geht live</li>
+          <li>Create a free account at <b>cal.com</b></li>
+          <li>Create a <b>"15 min Demo"</b> event type with your availability</li>
+          <li>Send your link (e.g. <code>homeservicereply/demo</code>) to Claude</li>
+          <li>Claude sets <code>CAL_LINK</code> and the calendar goes live</li>
         </ol>
       </div>
     </div>
 
     <footer>
-      <span>Potsdam Media // internes Werkzeug-Dach</span>
+      <span>Potsdam Media // internal tooling</span>
       <span>HomeServiceReply Ops</span>
     </footer>
 
   </div>
 
 <script>
-  /* ===== Konfiguration =====
-     Sobald der Cal.com-Link da ist, hier eintragen, z.B.:
+  /* ===== Config =====
+     Once the Cal.com link is ready, set it here, e.g.:
      const CAL_LINK = "homeservicereply/demo";
   */
   const CAL_LINK = "";
 
-  // Uhr (HUD)
+  // Clock (HUD)
   function tick() {
     const d = new Date();
     const p = n => String(n).padStart(2, "0");
@@ -370,7 +370,7 @@
   }
   tick(); setInterval(tick, 1000);
 
-  // Kalender: Cal.com inline embed, nur wenn CAL_LINK gesetzt ist
+  // Calendar: Cal.com inline embed, only when CAL_LINK is set
   (function () {
     const mount = document.getElementById("cal-inline");
     const connect = document.getElementById("cal-connect");
