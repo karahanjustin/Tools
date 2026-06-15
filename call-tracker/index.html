@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Call Tracker</title>
+<style>
+  :root {
+    --bg: #0b0b12;
+    --bg-2: #11111a;
+    --surface: #16161f;
+    --surface-2: #1d1d28;
+    --surface-hover: #232330;
+    --border: #2a2a38;
+    --border-strong: #3a3a4d;
+    --text: #ececf2;
+    --text-2: #a0a0ad;
+    --text-3: #6b6b7a;
+
+    --accent: #8b5cf6;
+    --accent-2: #a78bfa;
+    --accent-soft: rgba(139, 92, 246, 0.12);
+
+    --success: #4ade80;
+    --success-bg: rgba(74, 222, 128, 0.12);
+    --warning: #fbbf24;
+    --warning-bg: rgba(251, 191, 36, 0.12);
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.12);
+    --info: #60a5fa;
+    --info-bg: rgba(96, 165, 250, 0.12);
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(139, 92, 246, 0.12), transparent 60%),
+      radial-gradient(700px 400px at -10% 10%, rgba(96, 165, 250, 0.08), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 2.5rem 1.5rem 4rem;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* Header */
+  .header-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 2rem; flex-wrap: wrap; gap: 12px;
+  }
+  h1 {
+    font-size: 28px; font-weight: 600; margin: 0;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* Form elements */
+  input, select, button, textarea {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  button { cursor: pointer; }
+  button:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+  button:active { transform: translateY(1px); }
+  button.primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+    border-color: transparent; color: white; font-weight: 500;
+  }
+  button.primary:hover { filter: brightness(1.1); }
+  button.danger { color: var(--danger); border-color: rgba(248,113,113,0.25); }
+  button.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
+  button.small { font-size: 12px; padding: 6px 12px; }
+
+  /* Mode switch (Calls / Email) */
+  .mode-switch {
+    display: inline-flex; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px; gap: 2px;
+  }
+  .mode-btn {
+    border: none; background: transparent; color: var(--text-2);
+    padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
+  }
+  .mode-btn:hover { background: var(--surface-hover); border-color: transparent; }
+  .mode-btn.active {
+    background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+    color: #fff;
+  }
+  .mode-btn.active:hover { filter: brightness(1.1); background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%); }
+
+  /* Stats grid */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 1.75rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 1rem 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent);
+    border-radius: var(--r-md) 0 0 var(--r-md);
+  }
+  .stat.s-success::before { background: var(--success); }
+  .stat.s-info::before { background: var(--info); }
+  .stat.s-warn::before { background: var(--warning); }
+  .stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .stat.s-success .stat-value { color: var(--success); }
+  .stat.s-info .stat-value { color: var(--info); }
+
+  /* Add form */
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1.2fr 1fr 0.9fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .field-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .add-form input, .add-form select { width: 100%; }
+
+  /* Callback banner */
+  .callback-banner {
+    background: linear-gradient(135deg, var(--warning-bg), rgba(251, 191, 36, 0.05));
+    color: var(--warning);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    margin-bottom: 1rem;
+    font-size: 13px;
+    display: none;
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .callback-banner:hover { filter: brightness(1.15); }
+  .callback-banner.active { display: block; }
+
+  /* Lead list */
+  #lead-list { display: flex; flex-direction: column; gap: 10px; }
+  .lead-row {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 14px 18px 14px 22px;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 12px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .lead-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .lead-row::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--text-3);
+  }
+  .lead-row.s-pending::before { background: var(--text-3); }
+  .lead-row.s-no_answer::before { background: var(--warning); }
+  .lead-row.s-not_int::before { background: var(--danger); }
+  .lead-row.s-interested::before { background: var(--success); }
+  .lead-row.s-closed::before { background: var(--info); }
+  .lead-row.overdue { border-color: rgba(248, 113, 113, 0.4); }
+  .lead-row.overdue::before { background: var(--danger); }
+
+  .lead-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+
+  .meta-row {
+    font-size: 12px; color: var(--text-2); margin-top: 4px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+  }
+  .meta-row a { color: var(--accent-2); text-decoration: none; }
+  .meta-row a:hover { text-decoration: underline; }
+  .meta-field { display: inline-flex; align-items: center; gap: 5px; }
+  .meta-sep { color: var(--text-3); }
+  .meta-label { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .inline-edit {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: inherit;
+    min-width: 30px;
+    max-width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .inline-edit:hover { background: var(--surface-2); }
+  .inline-edit:focus { background: var(--surface-2); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); outline: none; }
+  .inline-edit.empty { color: var(--text-3); font-style: italic; }
+
+  .status-badge {
+    font-size: 11px; font-weight: 500; padding: 4px 10px;
+    border-radius: 999px; white-space: nowrap;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-pending    { background: var(--surface-2); color: var(--text-3); }
+  .badge-no_answer  { background: var(--warning-bg); color: var(--warning); }
+  .badge-not_int    { background: var(--danger-bg); color: var(--danger); }
+  .badge-interested { background: var(--success-bg); color: var(--success); }
+  .badge-closed     { background: var(--info-bg); color: var(--info); }
+
+  .notes-input {
+    margin-top: 8px; width: 100%; font-size: 12px; padding: 8px 10px;
+    min-height: 64px; resize: vertical;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm);
+    font-family: inherit; line-height: 1.5; color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .notes-input:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .callback-row {
+    margin-top: 8px; font-size: 11px; color: var(--text-2);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .callback-input { font-size: 11px; padding: 3px 6px; height: 26px; color-scheme: dark; }
+  .icon-btn {
+    font-size: 12px; padding: 0 12px; height: 30px;
+    color: var(--text-2); background: transparent;
+  }
+  .icon-btn.danger:hover { color: var(--danger); border-color: rgba(248,113,113,0.4); background: var(--danger-bg); }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--text-3); font-size: 14px;
+    border: 1px dashed var(--border); border-radius: var(--r-md);
+    background: rgba(255,255,255,0.01);
+  }
+
+  .footer {
+    margin-top: 3rem; font-size: 11px; color: var(--text-3); text-align: center;
+    line-height: 1.6;
+  }
+  .footer code { background: var(--surface); padding: 1px 6px; border-radius: 4px; color: var(--text-2); }
+
+  /* Lead finder panel */
+  #finder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 1.1rem 1.2rem 1.2rem;
+    margin-bottom: 1.25rem;
+  }
+  #finder .finder-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  #finder .finder-head .title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  #finder .finder-head .sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+  .finder-form {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.7fr auto;
+    gap: 10px; align-items: end;
+  }
+  .finder-form input, .finder-form select { width: 100%; }
+  .finder-status {
+    margin-top: 12px; font-size: 12px; color: var(--text-2);
+    min-height: 18px; display: flex; align-items: center; gap: 8px;
+  }
+  .finder-status .spin {
+    width: 13px; height: 13px; border: 2px solid var(--accent-soft);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: ct-spin 0.7s linear infinite; display: inline-block;
+  }
+  @keyframes ct-spin { to { transform: rotate(360deg); } }
+  .finder-status.err { color: var(--danger); }
+  .finder-status.ok { color: var(--success); }
+
+  .staging-wrap { margin-top: 14px; overflow-x: auto; }
+  table.staging { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.staging th {
+    text-align: left; padding: 8px 8px; font-size: 11px; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  table.staging td { padding: 4px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.staging tr:hover td { background: var(--surface-2); }
+  table.staging input {
+    width: 100%; font-size: 12px; padding: 6px 8px; min-width: 90px;
+    background: transparent; border: 1px solid transparent; border-radius: 5px;
+  }
+  table.staging input:hover { background: var(--surface); border-color: var(--border); }
+  table.staging input:focus { background: var(--surface); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); outline: none; }
+  table.staging .col-x { width: 36px; text-align: center; }
+  .row-remove {
+    width: 26px; height: 26px; padding: 0; line-height: 1; font-size: 14px;
+    color: var(--text-3); background: transparent; border: 1px solid var(--border);
+    border-radius: 50%;
+  }
+  .row-remove:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+  .staging-actions { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .staging-count { font-size: 12px; color: var(--text-3); margin-left: auto; }
+
+  @media (max-width: 720px) {
+    body { padding: 1.5rem 1rem 3rem; }
+    h1 { font-size: 22px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .add-form { grid-template-columns: 1fr 1fr; }
+    .add-form > button { grid-column: 1 / -1; }
+    .lead-row { grid-template-columns: 1fr; }
+    .finder-form { grid-template-columns: 1fr 1fr; }
+    .finder-form > button { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header-row">
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <h1 id="app-title">Call Tracker</h1>
+    <div class="mode-switch">
+      <button id="mode-call" class="mode-btn" onclick="setMode('call')">Calls</button>
+      <button id="mode-email" class="mode-btn" onclick="setMode('email')">Email</button>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="small primary" onclick="toggleFinder()" id="finder-toggle">Find leads</button>
+    <button class="small" onclick="document.getElementById('csv-file').click()">Import CSV</button>
+    <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)" />
+    <button class="small" onclick="exportData()">Export JSON</button>
+    <button class="small" onclick="document.getElementById('import-file').click()">Import JSON</button>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importData(event)" />
+    <button class="small danger" onclick="clearAll()">Clear all</button>
+  </div>
+</div>
+
+<section id="finder" style="display:none">
+  <div class="finder-head">
+    <div>
+      <div class="title">Find leads</div>
+      <div class="sub">Pick a niche and a US location, then add the results to your list. Data comes from OpenStreetMap. Email is often missing and stays editable.</div>
+    </div>
+    <button class="small" onclick="toggleFinder()">Close</button>
+  </div>
+  <div class="finder-form">
+    <div>
+      <div class="field-label">Niche</div>
+      <input type="text" id="f-niche" list="niche-suggest" placeholder="e.g. dentist, plumber, restaurant" />
+      <datalist id="niche-suggest"></datalist>
+    </div>
+    <div>
+      <div class="field-label">State</div>
+      <select id="f-state"></select>
+    </div>
+    <div>
+      <div class="field-label">City</div>
+      <input type="text" id="f-city" list="city-suggest" placeholder="e.g. Austin" />
+      <datalist id="city-suggest"></datalist>
+    </div>
+    <div>
+      <div class="field-label">Metro radius</div>
+      <select id="f-radius">
+        <option value="0">City only</option>
+        <option value="25000" selected>+ 25 km</option>
+        <option value="50000">+ 50 km</option>
+      </select>
+    </div>
+    <button class="primary" id="f-go" onclick="runFinderSearch()" style="height: 38px;">Search</button>
+  </div>
+  <div class="finder-status" id="f-status"></div>
+  <div class="staging-wrap" id="staging-wrap" style="display:none">
+    <table class="staging" id="staging-table">
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Address</th><th>Website</th><th>Phone</th><th class="col-x"></th>
+        </tr>
+      </thead>
+      <tbody id="staging-body"></tbody>
+    </table>
+    <div class="staging-actions">
+      <button class="primary" id="f-addall" onclick="addAllStaged()">Add all to Un-called</button>
+      <button class="small danger" onclick="clearStaging()">Clear results</button>
+      <span class="staging-count" id="staging-count"></span>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="stat-total">0</div></div>
+  <div class="stat s-warn"><div class="stat-label" id="lbl-called">Called</div><div class="stat-value" id="stat-called">0</div></div>
+  <div class="stat s-success"><div class="stat-label" id="lbl-interested">Interested</div><div class="stat-value" id="stat-interested">0</div></div>
+  <div class="stat s-info"><div class="stat-label">Closed</div><div class="stat-value" id="stat-closed">0</div></div>
+</div>
+
+<div class="add-form">
+  <div>
+    <div class="field-label">Business name</div>
+    <input type="text" id="input-name" placeholder="e.g. Austin Plumbing" />
+  </div>
+  <div id="field-phone">
+    <div class="field-label">Phone</div>
+    <input type="text" id="input-phone" placeholder="optional" />
+  </div>
+  <div>
+    <div class="field-label">Website</div>
+    <input type="text" id="input-website" placeholder="optional" />
+  </div>
+  <div>
+    <div class="field-label">Email</div>
+    <input type="text" id="input-email" placeholder="optional" />
+  </div>
+  <div>
+    <div class="field-label">Site quality</div>
+    <select id="input-site">
+      <option value="unknown">???</option>
+      <option value="none">No website</option>
+      <option value="bad">Bad / outdated</option>
+      <option value="ok">Decent</option>
+    </select>
+  </div>
+  <button class="primary" onclick="addLead()" style="height: 38px;">+ Add</button>
+</div>
+
+<div id="callback-banner" class="callback-banner" onclick="toggleCallbackFilter()"></div>
+
+<div id="lead-list"></div>
+
+<div id="empty-state" class="empty-state">
+  Add your first lead above — aim for 20 before you start calling
+</div>
+
+<div class="footer">
+  Data is stored locally in your browser and never leaves this device.<br/>
+  CSV format: header row recognized, <code>name, phone, website, email, address, quality, notes</code> (any subset). Missing fields show as <code>???</code> and can be edited later.
+</div>
+
+</div>
+
+<script>
+const MISSING = '???';
+let leads = [];
+let callbackFilter = false;
+
+// Two independent lists, switched by mode. Email and call share the same status
+// keys, only the labels and a few terms differ.
+const CALL_KEY = 'call-tracker-leads-v1';
+const EMAIL_KEY = 'call-tracker-emails-v1';
+let mode = (localStorage.getItem('call-tracker-mode') === 'email') ? 'email' : 'call';
+function storageKey() { return mode === 'email' ? EMAIL_KEY : CALL_KEY; }
+
+const STATUS_LABELS = {
+  call:  { pending:'Not called', no_answer:'No answer', not_int:'Not interested', interested:'Interested', closed:'Closed' },
+  email: { pending:'Not sent',   no_answer:'No reply',  not_int:'Not interested', interested:'Replied',    closed:'Closed' },
+};
+const MODE_TERMS = {
+  call:  { called:'Called', interested:'Interested', dateLabel:'Callback',  dueNoun:'callback',  uncontacted:'Un-called', verb:'calling',  title:'Call Tracker' },
+  email: { called:'Sent',   interested:'Replied',    dateLabel:'Follow-up', dueNoun:'follow-up', uncontacted:'Not-sent',  verb:'emailing', title:'Email Tracker' },
+};
+function statusConfig() {
+  const m = STATUS_LABELS[mode];
+  return { pending:{label:m.pending}, no_answer:{label:m.no_answer}, not_int:{label:m.not_int}, interested:{label:m.interested}, closed:{label:m.closed} };
+}
+function terms() { return MODE_TERMS[mode]; }
+
+function loadLeads() {
+  try {
+    const raw = localStorage.getItem(storageKey());
+    leads = raw ? JSON.parse(raw) : [];
+    leads = leads.map(l => ({ website: '', email: '', address: '', callback: '', ...l }));
+  } catch (e) { leads = []; }
+  render();
+}
+
+function persist() { localStorage.setItem(storageKey(), JSON.stringify(leads)); }
+
+function setMode(m) {
+  if (m === mode) return;
+  persist();                       // save the list we are leaving
+  mode = m;
+  localStorage.setItem('call-tracker-mode', mode);
+  applyModeChrome();
+  loadLeads();                     // load + render the other list
+}
+
+// Update all mode-dependent labels/chrome (does not touch the list data).
+function applyModeChrome() {
+  const t = terms();
+  document.getElementById('mode-call').classList.toggle('active', mode === 'call');
+  document.getElementById('mode-email').classList.toggle('active', mode === 'email');
+  document.getElementById('app-title').textContent = t.title;
+  document.title = t.title;
+  document.getElementById('lbl-called').textContent = t.called;
+  document.getElementById('lbl-interested').textContent = t.interested;
+  document.getElementById('field-phone').style.display = (mode === 'email') ? 'none' : '';
+  const empty = document.getElementById('empty-state');
+  if (empty) empty.textContent = `Add your first lead above, aim for 20 before you start ${t.verb}`;
+  const addAll = document.getElementById('f-addall');
+  if (addAll && !finderResults.length) addAll.textContent = `Add all to ${t.uncontacted}`;
+}
+function newId(offset = 0) { return Date.now() + Math.floor(Math.random() * 100000) + offset; }
+
+function addLead() {
+  const name = document.getElementById('input-name').value.trim();
+  if (!name) return;
+  leads.push({
+    id: newId(),
+    name,
+    phone: document.getElementById('input-phone').value.trim(),
+    website: document.getElementById('input-website').value.trim(),
+    email: document.getElementById('input-email').value.trim(),
+    address: '',
+    site: document.getElementById('input-site').value,
+    status: 'pending', note: '', callback: '',
+  });
+  persist();
+  ['input-name','input-phone','input-website','input-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('input-site').value = 'unknown';
+  render();
+}
+
+function setStatus(id, status) {
+  leads = leads.map(l => {
+    if (l.id !== id) return l;
+    const updated = { ...l, status };
+    if ((status === 'no_answer' || status === 'interested') && !l.callback) {
+      const days = status === 'no_answer' ? 2 : 5;
+      const d = new Date(); d.setDate(d.getDate() + days);
+      updated.callback = d.toISOString().slice(0, 10);
+    }
+    return updated;
+  });
+  persist();
+  render();
+}
+
+function setField(id, field, val) {
+  leads = leads.map(l => l.id === id ? { ...l, [field]: val } : l);
+  persist();
+  if (field === 'site') render();
+}
+
+function setCallback(id, val) { setField(id, 'callback', val); render(); }
+function removeLead(id) { leads = leads.filter(l => l.id !== id); persist(); render(); }
+
+function clearAll() {
+  if (!leads.length) return alert('Already empty.');
+  if (!confirm(`Delete all ${leads.length} lead${leads.length === 1 ? '' : 's'}? This cannot be undone.`)) return;
+  if (!confirm('Are you absolutely sure? Export your data first if you want a backup.')) return;
+  leads = [];
+  persist();
+  render();
+}
+
+let noteTimers = {};
+function updateNote(id, val) {
+  leads = leads.map(l => l.id === id ? { ...l, note: val } : l);
+  clearTimeout(noteTimers[id]);
+  noteTimers[id] = setTimeout(persist, 300);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(leads, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `call-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('Invalid format');
+      if (leads.length && !confirm(`Replace ${leads.length} existing leads with ${imported.length} imported leads?`)) return;
+      leads = imported;
+      persist();
+      render();
+    } catch (err) { alert('Could not import: ' + err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"' && text[i+1] === '"') { cell += '"'; i++; }
+      else if (c === '"') inQuotes = false;
+      else cell += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',' || c === ';' || c === '\t') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i+1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+  }
+  if (cell.length || row.length) { row.push(cell); rows.push(row); }
+  return rows.map(r => r.map(c => c.trim())).filter(r => r.some(x => x));
+}
+
+function mapHeader(h) {
+  h = h.trim().toLowerCase();
+  if (['name','business','company','firma','unternehmen'].includes(h)) return 'name';
+  if (['phone','tel','telephone','telefon','number'].includes(h)) return 'phone';
+  if (['website','url','web','site_url','homepage'].includes(h)) return 'website';
+  if (['email','mail','e-mail','e_mail'].includes(h)) return 'email';
+  if (['address','adress','addr','street','location','anschrift','adresse'].includes(h)) return 'address';
+  if (['quality','site_quality','site quality','site','rating'].includes(h)) return 'site';
+  if (['note','notes','notiz','comment','comments'].includes(h)) return 'note';
+  return null;
+}
+
+function normalizeSite(v) {
+  v = (v || '').trim().toLowerCase();
+  if (['none','no','no website','keine'].includes(v)) return 'none';
+  if (['bad','poor','outdated','schlecht'].includes(v)) return 'bad';
+  if (['ok','okay','decent','good','gut'].includes(v)) return 'ok';
+  return 'unknown';
+}
+
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const rows = parseCSV(e.target.result);
+      if (!rows.length) throw new Error('Empty CSV');
+      const headerKeys = rows[0].map(mapHeader);
+      const hasHeader = headerKeys.some(k => k !== null);
+      const dataRows = hasHeader ? rows.slice(1) : rows;
+      const cols = hasHeader ? headerKeys : ['name','phone','website','email','site','note'];
+      const newLeads = [];
+      let added = 0;
+      for (const r of dataRows) {
+        const lead = { name: '', phone: '', website: '', email: '', address: '', site: '', note: '' };
+        cols.forEach((col, i) => { if (col && r[i] !== undefined) lead[col] = r[i].trim(); });
+        if (!lead.name) continue;
+        newLeads.push({
+          id: newId(added),
+          name: lead.name,
+          phone: lead.phone || MISSING,
+          website: lead.website || MISSING,
+          email: lead.email || MISSING,
+          address: lead.address || '',
+          site: lead.site ? normalizeSite(lead.site) : 'unknown',
+          status: 'pending',
+          note: lead.note || '',
+          callback: '',
+        });
+        added++;
+      }
+      if (!added) throw new Error('No valid rows found (need at least a name column)');
+      leads = leads.concat(newLeads);
+      persist();
+      render();
+      alert(`Imported ${added} lead${added === 1 ? '' : 's'}.${hasHeader ? '' : ' (no header detected)'}`);
+    } catch (err) { alert('Could not import CSV: ' + err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function toggleCallbackFilter() { callbackFilter = !callbackFilter; render(); }
+
+function callbackState(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  if (dateStr < today) return 'overdue';
+  if (dateStr === today) return 'today';
+  return 'future';
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = leads.length;
+  document.getElementById('stat-called').textContent = leads.filter(l => l.status !== 'pending').length;
+  document.getElementById('stat-interested').textContent = leads.filter(l => l.status === 'interested').length;
+  document.getElementById('stat-closed').textContent = leads.filter(l => l.status === 'closed').length;
+}
+
+function escapeHtml(s) {
+  return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function isMissing(v) { return !v || v === MISSING; }
+function normalizeUrl(u) { return /^https?:\/\//i.test(u) ? u : 'https://' + u; }
+
+function renderField(lead, field, type, placeholder, label) {
+  const val = lead[field] || '';
+  const empty = isMissing(val);
+  const display = empty ? MISSING : val;
+  let icon = '';
+  if (!empty) {
+    if (type === 'phone') icon = ` <a href="tel:${escapeHtml(val)}" title="Call">📞</a>`;
+    else if (type === 'email') icon = ` <a href="mailto:${escapeHtml(val)}" title="Email">✉</a>`;
+    else if (type === 'website') icon = ` <a href="${escapeHtml(normalizeUrl(val))}" target="_blank" rel="noopener" title="Open">🔗</a>`;
+  }
+  const inputAttrs = `class="inline-edit${empty ? ' empty' : ''}" value="${escapeHtml(display)}" placeholder="${placeholder}" size="${Math.max(placeholder.length, display.length)}" onfocus="if(this.value==='${MISSING}')this.value=''" onblur="setField(${lead.id}, '${field}', this.value.trim())"`;
+  return `<span class="meta-field"><span class="meta-label">${label}</span><input type="text" ${inputAttrs} />${icon}</span>`;
+}
+
+function render() {
+  updateStats();
+  const list = document.getElementById('lead-list');
+  const empty = document.getElementById('empty-state');
+
+  const today = new Date().toISOString().slice(0, 10);
+  const dueCount = leads.filter(l => l.callback && l.callback <= today && l.status !== 'closed' && l.status !== 'not_int').length;
+  const banner = document.getElementById('callback-banner');
+  if (dueCount > 0) {
+    banner.classList.add('active');
+    const dn = terms().dueNoun;
+    banner.textContent = callbackFilter
+      ? `Showing ${dueCount} ${dn}${dueCount === 1 ? '' : 's'} due, click to show all leads`
+      : `${dueCount} ${dn}${dueCount === 1 ? '' : 's'} due today or overdue, click to focus`;
+  } else {
+    banner.classList.remove('active');
+    if (callbackFilter) callbackFilter = false;
+  }
+
+  let visible = leads.slice();
+  if (callbackFilter) {
+    visible = visible.filter(l => l.callback && l.callback <= today && l.status !== 'closed' && l.status !== 'not_int');
+  }
+  visible.sort((a, b) => {
+    const sa = callbackState(a.callback), sb = callbackState(b.callback);
+    const rank = { overdue: 0, today: 1, future: 2, null: 3 };
+    return rank[sa] - rank[sb];
+  });
+
+  empty.style.display = visible.length ? 'none' : 'block';
+
+  list.innerHTML = visible.map(l => {
+    const cbState = callbackState(l.callback);
+    const overdueClass = cbState === 'overdue' ? ' overdue' : '';
+    const sc = statusConfig();
+    const statusOpts = Object.entries(sc).map(([k, v]) =>
+      `<option value="${k}" ${l.status === k ? 'selected' : ''}>${v.label}</option>`
+    ).join('');
+    const siteOpts = [
+      ['unknown', '???'],
+      ['none', 'No website'],
+      ['bad', 'Bad / outdated'],
+      ['ok', 'Decent'],
+    ].map(([k, lbl]) => `<option value="${k}" ${l.site === k ? 'selected' : ''}>${lbl}</option>`).join('');
+
+    return `
+    <div class="lead-row s-${l.status}${overdueClass}">
+      <div>
+        <div class="lead-name">${escapeHtml(l.name)}</div>
+        <div class="meta-row">
+          ${mode === 'call' ? renderField(l, 'phone', 'phone', 'phone', 'Phone:') + '<span class="meta-sep">·</span>' : ''}
+          ${renderField(l, 'website', 'website', 'website', 'Link')}
+          <span class="meta-sep">·</span>
+          ${renderField(l, 'email', 'email', 'email', 'E-Mail:')}
+          <span class="meta-sep">·</span>
+          <span class="meta-field"><span class="meta-label">Quality:</span><select onchange="setField(${l.id}, 'site', this.value); render()" class="inline-edit" style="font-size: 11px; height: 24px;">${siteOpts}</select></span>
+        </div>
+        <div class="meta-row">
+          ${renderField(l, 'address', 'address', 'address', 'Addr:')}
+        </div>
+        <textarea class="notes-input" placeholder="Notes — type freely, Cmd/Ctrl+Enter saves immediately" rows="3" oninput="updateNote(${l.id}, this.value)" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHtml(l.note)}</textarea>
+        <div class="callback-row">
+          <span class="meta-label">${terms().dateLabel}</span>
+          <input type="date" class="callback-input" value="${escapeHtml(l.callback || '')}" onchange="setCallback(${l.id}, this.value)" />
+          ${l.callback ? `<button class="small" style="font-size:10px; padding:2px 8px; height:22px;" onclick="setCallback(${l.id}, '')">clear</button>` : ''}
+          ${cbState === 'overdue' ? '<span style="color: var(--danger); font-weight: 500;">overdue</span>' : ''}
+          ${cbState === 'today' ? '<span style="color: var(--warning); font-weight: 500;">today</span>' : ''}
+        </div>
+      </div>
+      <span class="status-badge badge-${l.status}">${sc[l.status].label}</span>
+      <select onchange="setStatus(${l.id}, this.value)" style="font-size: 12px; padding: 4px 8px; height: 30px;">${statusOpts}</select>
+      <button class="icon-btn danger" onclick="removeLead(${l.id})" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+
+['input-name','input-phone','input-website','input-email'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addLead(); });
+});
+
+/* ==================================================================
+   LEAD FINDER (browser-side OpenStreetMap search, US-focused)
+   Ported from the retired Local Lead Finder V2. Pure client-side:
+   geocode via Nominatim, businesses via Overpass. No backend.
+================================================================== */
+
+// Niche catalog: each entry maps search terms to OSM tag filters.
+const CATEGORIES = [
+  { names:["marketing agentur","werbeagentur","marketing agency","advertising agency","marketing","advertising","ads agency","branding agency","creative agency","content agency","digital marketing","performance marketing","seo agency","sem agency","social media agency"],
+    label:"Marketing / Werbeagentur",
+    filters:['office=advertising_agency','office=marketing','craft=sign_maker','shop=advertising'] },
+  { names:["pr agentur","kommunikationsagentur","public relations","pr agency","communications agency","pr firm","öffentlichkeitsarbeit","press agency","presseagentur"],
+    label:"PR / Kommunikation", filters:['office=newspaper','office=publisher','office=consulting'] },
+  { names:["softwarefirma","softwareentwicklung","software company","software development","software agency","software house","app entwicklung","app development","app developer","saas","tech company","it company","it firma","it dienstleister","it services"],
+    label:"Software / IT", filters:['office=it','office=software','craft=electronics_repair'] },
+  { names:["webdesign","webagentur","web agency","web design","webentwicklung","web development","web developer","frontend","backend","fullstack","ui design","ux design"],
+    label:"Web / Design", filters:['office=web_design','office=graphic_design','craft=photographer'] },
+  { names:["beratung","unternehmensberatung","consulting","consultancy","consultant","berater","strategieberatung","management consulting","business consulting"],
+    label:"Consulting", filters:['office=consulting','office=accountant','office=lawyer'] },
+  { names:["fitnessstudio","gym","fitness center","fitness centre","fitness","crossfit","yoga studio","yoga","pilates","pilates studio","training","fitness club","health club","sportstudio","kraftraum"],
+    label:"Fitness", filters:['leisure=fitness_centre','leisure=sports_centre','leisure=fitness_station'] },
+  { names:["restaurant","restaurants","gaststätte","gaststaette","gasthaus","gasthof","wirtshaus","lokal","speiselokal","bistro","brasserie"],
+    label:"Restaurant", filters:['amenity=restaurant','amenity=fast_food','amenity=food_court'] },
+  { names:["cafe","café","cafes","coffee shop","coffeeshop","coffeehouse","kaffeehaus","kaffee","coffee bar","espresso bar"],
+    label:"Café", filters:['amenity=cafe','shop=coffee'] },
+  { names:["bar","bars","kneipe","kneipen","pub","pubs","beer garden","biergarten","cocktailbar","cocktail bar","weinbar","wine bar","sportsbar","sports bar"],
+    label:"Bar / Pub", filters:['amenity=bar','amenity=pub','amenity=biergarten'] },
+  { names:["bäckerei","baeckerei","backstube","bakery","bakeries","bread shop","brot","backshop"],
+    label:"Bäckerei", filters:['shop=bakery','craft=bakery'] },
+  { names:["friseur","friseursalon","frisör","hairdresser","hair salon","barber","barbershop","barber shop","haircuts","hair stylist","beauty salon","hair studio"],
+    label:"Friseur", filters:['shop=hairdresser','shop=beauty','craft=hairdresser'] },
+  { names:["zahnarzt","zahnärzte","dentist","dentists","dental","dental practice","dental clinic","dental office"],
+    label:"Zahnarzt", filters:['amenity=dentist','healthcare=dentist'] },
+  { names:["arzt","ärzte","arztpraxis","praxis","doctor","doctors","physician","physicians","medical practice","medical office","general practitioner","gp","family doctor","hausarzt"],
+    label:"Arztpraxis", filters:['amenity=doctors','healthcare=doctor','healthcare=clinic'] },
+  { names:["apotheke","apotheken","pharmacy","pharmacies","drugstore","chemist"],
+    label:"Apotheke", filters:['amenity=pharmacy','healthcare=pharmacy'] },
+  { names:["anwalt","rechtsanwalt","anwälte","kanzlei","lawyer","lawyers","attorney","attorneys","law firm","law office","legal","legal services","jurist","advocate"],
+    label:"Rechtsanwalt", filters:['office=lawyer','amenity=lawyer'] },
+  { names:["steuerberater","tax advisor","tax consultant","tax accountant","accountant","accounting","accountants","bookkeeper","bookkeeping","buchhaltung"],
+    label:"Steuerberater", filters:['office=tax_advisor','office=accountant'] },
+  { names:["immobilien","immobilienmakler","makler","real estate","realtor","realtors","real estate agent","realty","property management","hausverwaltung"],
+    label:"Immobilien", filters:['office=estate_agent','shop=estate_agent'] },
+  { names:["versicherung","versicherungen","versicherungsmakler","insurance","insurance agent","insurance broker","insurance agency"],
+    label:"Versicherung", filters:['office=insurance'] },
+  { names:["architekt","architekten","architekturbüro","architect","architects","architecture firm","architectural"],
+    label:"Architekt", filters:['office=architect'] },
+  { names:["handwerker","tischler","schreiner","carpenter","carpenters","carpentry","woodworker","woodworking","cabinet maker","cabinetry","joiner","joinery"],
+    label:"Handwerk", filters:['craft=carpenter','craft=joiner','craft=cabinet_maker'] },
+  { names:["klempner","sanitär","sanitaer","plumber","plumbers","plumbing","pipefitter","heizung","heating","hvac","heizungsbauer","installateur"],
+    label:"Sanitär / Klempner", filters:['craft=plumber','craft=hvac'] },
+  { names:["elektriker","elektroniker","electrician","electricians","electrical","electrical contractor","electric service","elektrobetrieb"],
+    label:"Elektriker", filters:['craft=electrician'] },
+  { names:["autowerkstatt","kfz","kfz werkstatt","werkstatt","car repair","auto repair","auto shop","mechanic","mechanics","garage","car service","autoservice","tire shop","reifenhandel","reifenservice"],
+    label:"Autowerkstatt", filters:['shop=car_repair','craft=car_repair','shop=car'] },
+  { names:["hotel","hotels","gästehaus","guest house","motel","motels","pension","b&b","bed and breakfast","boutique hotel","resort","hostel"],
+    label:"Hotel", filters:['tourism=hotel','tourism=guest_house','tourism=motel','tourism=hostel'] },
+  { names:["supermarkt","supermarkets","supermarket","grocery","grocery store","grocer","lebensmittel"],
+    label:"Supermarkt", filters:['shop=supermarket','shop=convenience'] },
+  { names:["boutique","modegeschäft","mode","fashion","clothing","clothing store","fashion store","clothes shop","apparel","apparel store"],
+    label:"Mode / Boutique", filters:['shop=clothes','shop=boutique','shop=fashion'] },
+  { names:["spielothek","spielhalle","spielhallen","casino","casinos","gambling","arcade","arcades","gaming centre","gaming center","slot hall","slot machines","spielbank"],
+    label:"Spielothek / Casino",
+    filters:['leisure=adult_gaming_centre','leisure=amusement_arcade','amenity=casino','amenity=gambling','shop=bookmaker','shop=lottery'] },
+  { names:["wettbüro","wettbuero","wettannahme","lottoannahme","lotto","bookmaker","betting","betting shop","betting office","lottery","lottery shop","wettshop"],
+    label:"Wettbüro / Lotto", filters:['shop=bookmaker','shop=lottery','amenity=gambling'] },
+  { names:["kino","kinos","cinema","cinemas","movie theater","movie theatre","film","filmtheater","multiplex"], label:"Kino", filters:['amenity=cinema'] },
+  { names:["theater","theatre","oper","opera","opernhaus","schauspielhaus","kabarett","comedy club","performing arts"],
+    label:"Theater", filters:['amenity=theatre','amenity=arts_centre'] },
+  { names:["diskothek","disko","disco","club","clubs","nightclub","nachtclub","tanzclub","dance club","lounge"],
+    label:"Club / Diskothek", filters:['amenity=nightclub','amenity=stripclub'] },
+  { names:["bowling","bowlingbahn","bowling alley","billard","billardsalon","billiards","pool hall","snooker","kegeln","kegelbahn"],
+    label:"Bowling / Billard", filters:['leisure=bowling_alley','sport=billiards','leisure=sports_centre'] },
+  { names:["escape room","escape rooms","lasertag","laser tag","paintball","paintball arena","indoor spielplatz","indoor playground","trampolinhalle","trampoline park","jump park","kletterhalle","climbing gym","boulderhalle","bouldering gym"],
+    label:"Freizeit-Halle", filters:['leisure=escape_game','sport=laser_tag','sport=paintball','leisure=trampoline_park','leisure=indoor_play','leisure=climbing'] },
+  { names:["shisha","shisha bar","shisha lounge","hookah","hookah lounge","hookah bar","wasserpfeife"],
+    label:"Shisha-Bar", filters:['amenity=hookah_lounge','amenity=shisha','amenity=bar'] },
+  { names:["eisdiele","eiscafe","eis café","eismanufaktur","gelateria","ice cream","ice cream parlor","ice cream shop","frozen yogurt","froyo"],
+    label:"Eisdiele", filters:['amenity=ice_cream','shop=ice_cream'] },
+  { names:["imbiss","schnellimbiss","döner","doener","kebab","kebap","pommes","pizza","pizzeria","burger","burger joint","snack bar","fast food","food truck","sub shop","sandwich shop","bbq","grill"],
+    label:"Imbiss / Fast Food", filters:['amenity=fast_food','amenity=food_court'] },
+  { names:["metzgerei","fleischerei","fleischer","butcher","butcher shop","butchery","meat shop"],
+    label:"Metzgerei", filters:['shop=butcher','craft=butcher'] },
+  { names:["konditorei","patisserie","pastry","pastry shop","confectionery","cake shop","cupcake shop","chocolatier"],
+    label:"Konditorei", filters:['shop=confectionery','shop=pastry','craft=confectioner'] },
+  { names:["weinhandlung","weingeschäft","weinhandel","wein","wine shop","wine store","wine merchant","winery","liquor store","liquor shop","spirituosen","spirits shop","bottle shop"],
+    label:"Weinhandlung", filters:['shop=wine','shop=alcohol','craft=winery'] },
+  { names:["brauerei","brewery","breweries","craft brewery","microbrewery","brewpub","beer hall"],
+    label:"Brauerei", filters:['craft=brewery','industrial=brewery'] },
+  { names:["kosmetik","kosmetikstudio","kosmetikerin","beauty","beauty salon","beauty studio","cosmetics","cosmetic studio","facial","skincare","skin care","make up","makeup artist","permanent make up"],
+    label:"Kosmetik", filters:['shop=beauty','shop=cosmetics','leisure=spa'] },
+  { names:["nagelstudio","nagelpflege","nail salon","nail studio","nails","manicure","pedicure","maniküre","pediküre"],
+    label:"Nagelstudio", filters:['shop=beauty','leisure=spa'] },
+  { names:["tattoo","tattoo studio","tattoos","tätowierer","tätowieren","tätowierungen","piercing","piercings","piercer","ink shop","tattoo shop","body modification"],
+    label:"Tattoo / Piercing", filters:['shop=tattoo','craft=tattoo','shop=piercing'] },
+  { names:["massage","massagepraxis","massage studio","massage therapy","massage therapist","masseur","masseuse","spa","spas","wellness","wellness center","wellness centre","day spa","sauna","saunaclub"],
+    label:"Massage / Spa", filters:['shop=massage','leisure=spa','leisure=sauna','amenity=spa'] },
+  { names:["sonnenstudio","solarium","tanning","tanning salon","tan studio","spray tan"],
+    label:"Sonnenstudio", filters:['leisure=tanning_salon','shop=tanning'] },
+  { names:["physiotherapie","physiotherapeut","physio","physiotherapist","physical therapy","physical therapist","krankengymnastik","rehabilitation","rehab","sportphysio","osteopath","osteopathie","chiropractor","chiropraktiker","chiropraktik"],
+    label:"Physiotherapie", filters:['healthcare=physiotherapist','amenity=physiotherapist'] },
+  { names:["heilpraktiker","heilpraktikerin","alternative medizin","alternative medicine","naturheilkunde","akupunktur","acupuncture","homöopathie","homeopathy","naturopath"],
+    label:"Heilpraktiker", filters:['healthcare=alternative','healthcare=psychotherapist'] },
+  { names:["optiker","optikerin","brille","brillen","optician","opticians","eyewear","eyeglasses","optometrist","optometry","eye care","sehtest"],
+    label:"Optiker", filters:['shop=optician','healthcare=optometrist'] },
+  { names:["hörgeräte","hörgeräteakustiker","hoergeraete","hearing aid","hearing aids","audiologist","audiology","hearing center"],
+    label:"Hörgeräte", filters:['shop=hearing_aids','healthcare=audiologist'] },
+  { names:["tierarzt","tierärztin","veterinarian","vet","vets","veterinary","animal hospital","tierklinik","tierarztpraxis"],
+    label:"Tierarzt", filters:['amenity=veterinary','healthcare=veterinary'] },
+  { names:["krankenhaus","klinik","kliniken","hospital","hospitals","clinic","clinics","medical center","medical centre","urgent care","emergency room"],
+    label:"Krankenhaus", filters:['amenity=hospital','amenity=clinic','healthcare=hospital'] },
+  { names:["psychologe","psychologin","psychotherapeut","psychotherapeutin","psychologist","therapist","therapy","counselor","counseling","counsellor","mental health","therapie"],
+    label:"Psychologe", filters:['healthcare=psychotherapist','healthcare=psychologist'] },
+  { names:["hebamme","midwife","midwives","doula","geburtshilfe"], label:"Hebamme", filters:['healthcare=midwife'] },
+  { names:["pflegedienst","ambulanter pflegedienst","pflege","altenpflege","caregiver","caregivers","nursing","nursing service","home care","home health","home health care","seniorenheim","altenheim","pflegeheim","retirement home","assisted living"],
+    label:"Pflegedienst", filters:['healthcare=nursing','amenity=nursing_home','amenity=social_facility'] },
+  { names:["buchhandlung","buchladen","bookstore","bookshop","bookstores","books","comic shop","manga shop"],
+    label:"Buchhandlung", filters:['shop=books'] },
+  { names:["spielwaren","spielzeug","spielzeuggeschäft","toy store","toy shop","toys","game store","board games","kids store"],
+    label:"Spielwaren", filters:['shop=toys'] },
+  { names:["elektronik","elektronikmarkt","electronics","electronics store","consumer electronics","appliance store","appliances","hifi"],
+    label:"Elektronik", filters:['shop=electronics','shop=hifi','shop=computer'] },
+  { names:["computer","computerladen","pc shop","computer store","computer repair","computer service","laptop repair","tech repair"],
+    label:"Computer / PC", filters:['shop=computer','shop=electronics'] },
+  { names:["handy","mobiltelefon","handyladen","handy shop","mobile phone","mobile phones","cell phone","cell phones","cellphone","smartphone","wireless store","phone repair","handy reparatur"],
+    label:"Handy-Shop", filters:['shop=mobile_phone'] },
+  { names:["juwelier","schmuck","schmuckgeschäft","jeweler","jewelers","jeweller","jewellery","jewelry","jewelry store","gold","silver","goldschmied","goldsmith"],
+    label:"Juwelier", filters:['shop=jewelry'] },
+  { names:["uhrmacher","uhren","uhrengeschäft","watches","watchmaker","watch shop","watch store","watch repair"],
+    label:"Uhrmacher", filters:['shop=watches','craft=clockmaker'] },
+  { names:["schuhgeschäft","schuhe","schuhladen","shoe store","shoe shop","shoes","footwear","sneaker shop","sneakers"],
+    label:"Schuhe", filters:['shop=shoes'] },
+  { names:["sportgeschäft","sportladen","sportartikel","sports shop","sports store","sporting goods","outdoor shop","outdoor store"],
+    label:"Sportgeschäft", filters:['shop=sports','shop=outdoor'] },
+  { names:["fahrrad","fahrradladen","fahrradgeschäft","bike shop","bike store","bicycle","bicycles","cycling shop","e-bike","ebike"],
+    label:"Fahrradgeschäft", filters:['shop=bicycle','craft=bicycle_repair'] },
+  { names:["möbel","moebel","möbelhaus","furniture","furniture store","furniture shop","home decor","home furnishings","interior design","einrichtung"],
+    label:"Möbel", filters:['shop=furniture','shop=interior_decoration'] },
+  { names:["baumarkt","heimwerker","hardware","hardware store","diy","diy store","home improvement","builders merchant","tool shop"],
+    label:"Baumarkt", filters:['shop=doityourself','shop=hardware','shop=trade'] },
+  { names:["gartencenter","garten geschäft","garden center","garden centre","garden shop","plant nursery","plant store","gärtnerei"],
+    label:"Gartencenter", filters:['shop=garden_centre','shop=florist'] },
+  { names:["blumen","blumenladen","blumengeschäft","florist","florists","flower shop","flowers","floristik","floristics"],
+    label:"Blumenladen", filters:['shop=florist'] },
+  { names:["drogerie","drugstore","drug store","health and beauty","beauty supply"],
+    label:"Drogerie", filters:['shop=chemist','shop=cosmetics'] },
+  { names:["second hand","secondhand","second-hand","thrift","thrift store","vintage","vintage shop","antiques","antique store","antique shop","flea market","flohmarkt","consignment"],
+    label:"Second Hand", filters:['shop=second_hand','shop=charity','shop=antiques'] },
+  { names:["tierhandlung","zoohandlung","zoo geschäft","pet shop","pet store","pet supplies","pets","pet grooming","hundefriseur","dog grooming"],
+    label:"Tierhandlung", filters:['shop=pet','shop=pet_grooming'] },
+  { names:["kiosk","späti","spaeti","spätkauf","spätis","convenience","convenience store","corner store","mini market","trafik"],
+    label:"Kiosk / Späti", filters:['shop=kiosk','shop=convenience','shop=newsagent'] },
+  { names:["tankstelle","tankstellen","gas station","gas stations","fuel","fuel station","filling station","petrol","petrol station","truck stop"],
+    label:"Tankstelle", filters:['amenity=fuel'] },
+  { names:["autohändler","autohaus","autohaeuser","car dealer","car dealership","auto dealership","used cars","new cars","motorcycle dealer","motorrad","motorrad händler"],
+    label:"Autohändler", filters:['shop=car','shop=motorcycle'] },
+  { names:["maler","malerbetrieb","malermeister","painter","painters","painting","painting contractor","house painter"],
+    label:"Maler", filters:['craft=painter'] },
+  { names:["dachdecker","roofer","roofers","roofing","roofing company","roofing contractor"],
+    label:"Dachdecker", filters:['craft=roofer'] },
+  { names:["gärtner","gaertner","gärtnerei","landschaftsgärtner","gardener","gardeners","gardening","garden service","garden services","landscape","landscaper","landscapers","landscaping","lawn care","lawn maintenance","lawn service","yard service","tree service","arborist"],
+    label:"Gärtner", filters:['craft=gardener','shop=garden_centre'] },
+  { names:["schlosser","schlossereien","metallbauer","metallbau","locksmith","locksmiths","lock service","key service","metal worker","welding","welder"],
+    label:"Schlosser", filters:['craft=locksmith','craft=metal_construction','shop=locksmith'] },
+  { names:["fliesenleger","fliesen","tiler","tilers","tiling","tile setter","tile installation","tile contractor"],
+    label:"Fliesenleger", filters:['craft=tiler'] },
+  { names:["bodenleger","parkettleger","flooring","flooring contractor","floor layer","floor installation","carpet installation","teppich"],
+    label:"Bodenleger", filters:['craft=floorer','craft=parquet_layer'] },
+  { names:["schneider","schneiderei","änderungsschneiderei","tailor","tailoring","tailors","alterations","seamstress"],
+    label:"Schneider", filters:['craft=tailor','shop=tailor'] },
+  { names:["reinigung","gebäudereinigung","reinigungsfirma","putzfirma","cleaning","cleaners","cleaning service","cleaning services","cleaning company","janitorial","janitor","house cleaning","commercial cleaning","carpet cleaning","window cleaning","fensterputzer","reinigungsdienst"],
+    label:"Reinigung", filters:['office=cleaning','shop=dry_cleaning','craft=cleaning'] },
+  { names:["umzugsunternehmen","umzug","umzugsfirma","moving","moving company","movers","mover","moving service","relocation","relocation service"],
+    label:"Umzug", filters:['office=moving_company','shop=moving','craft=moving'] },
+  { names:["notar","notary","notaries","notary public","beglaubigung"], label:"Notar", filters:['office=notary'] },
+  { names:["bank","banken","sparkasse","bankfiliale","bank branch","credit union","savings bank"], label:"Bank", filters:['amenity=bank'] },
+  { names:["druckerei","druckereien","copy shop","copyshop","print shop","printing","printer","printer shop","print services","drucken","sign shop"],
+    label:"Druckerei", filters:['shop=copyshop','craft=printer','industrial=printing'] },
+  { names:["fotograf","fotografin","fotostudio","photo studio","photographer","photographers","photography","photography studio","portrait studio"],
+    label:"Fotograf", filters:['shop=photo','craft=photographer','office=photographer'] },
+  { names:["reisebüro","reisebuero","reisebüros","travel agency","travel agencies","travel agent","tour operator","tourismus"],
+    label:"Reisebüro", filters:['shop=travel_agency','office=travel_agent'] },
+  { names:["fahrschule","fahrschulen","driving school","driving schools","driving instructor"],
+    label:"Fahrschule", filters:['amenity=driving_school','office=educational_institution'] },
+  { names:["kindergarten","kindergärten","kita","kitas","daycare","day care","childcare","child care","preschool","pre-school","nursery school","kindertagesstätte"],
+    label:"Kindergarten", filters:['amenity=kindergarten','amenity=childcare'] },
+  { names:["schule","schulen","school","schools","grundschule","gymnasium","realschule","high school","middle school","elementary school","private school"],
+    label:"Schule", filters:['amenity=school','amenity=college'] },
+  { names:["universität","universitäten","university","universities","hochschule","fachhochschule","college","colleges"],
+    label:"Universität", filters:['amenity=university','amenity=college'] },
+  { names:["coworking","co-working","coworking space","shared office","shared workspace","flex office","business center","business centre"],
+    label:"Coworking", filters:['office=coworking','amenity=coworking_space'] },
+  { names:["kirche","kirchen","church","churches","moschee","mosque","mosques","synagoge","synagogue","synagogues","tempel","temple","temples","gotteshaus","place of worship"],
+    label:"Religion", filters:['amenity=place_of_worship','building=church','building=mosque'] },
+  { names:["museum","museums","museen"], label:"Museum", filters:['tourism=museum'] },
+  { names:["galerie","galerien","gallery","galleries","kunstgalerie","art gallery","art galleries","kunsthandel","art dealer"],
+    label:"Galerie", filters:['tourism=gallery','shop=art'] },
+  { names:["bibliothek","bibliotheken","library","libraries","stadtbibliothek","public library"], label:"Bibliothek", filters:['amenity=library'] },
+  { names:["catering","caterer","caterers","catering service","party service","event catering","food service","mobile küche"],
+    label:"Catering", filters:['shop=caterer','amenity=catering','office=catering'] },
+  { names:["event","eventagentur","event planner","event planning","event management","veranstalter","veranstaltungstechnik","wedding planner","hochzeitsplaner"],
+    label:"Event-Agentur", filters:['office=event_management','office=events','shop=event'] },
+  { names:["coach","coaching","life coach","business coach","executive coach","mental coach","mindset coach","career coach","mentor","leadership coach"],
+    label:"Coaching", filters:['office=coaching','office=consulting','office=educational_institution'] },
+  { names:["personal trainer","personaltrainer","personal training","fitness trainer","gym trainer","strength training"],
+    label:"Personal Trainer", filters:['leisure=fitness_centre','office=personal_trainer','sport=fitness'] },
+  { names:["übersetzer","übersetzerin","übersetzungen","übersetzungsbüro","translator","translators","translation","translation service","translation agency","dolmetscher","interpreter","localization"],
+    label:"Übersetzer", filters:['office=translator','office=translation','craft=translator'] },
+  { names:["abschleppdienst","abschlepper","towing","towing service","tow truck","tow service","road service","pannenhilfe","roadside assistance"],
+    label:"Abschleppdienst", filters:['shop=car_repair','craft=towing','amenity=towing'] },
+  { names:["taxi","taxiunternehmen","taxis","cab","cab company","cab service","taxistand","ride share","limousine","limousine service","limo","chauffeur","fahrdienst"],
+    label:"Taxi / Fahrdienst", filters:['amenity=taxi','office=taxi'] },
+  { names:["bestattung","bestatter","bestattungsinstitut","beerdigung","funeral home","funeral parlor","funeral parlour","funeral director","mortician","mortuary","cemetery","friedhof"],
+    label:"Bestattung", filters:['shop=funeral_directors','office=funeral_directors','amenity=funeral_hall','landuse=cemetery'] },
+  { names:["lager","selfstorage","self storage","self-storage","storage","storage facility","storage unit","mietlager","umzugslager"],
+    label:"Selfstorage", filters:['shop=storage_rental','amenity=storage_rental','building=storage'] },
+  { names:["vermietung","mietservice","rental","rental service","equipment rental","tool rental","car rental","autovermietung","fahrradverleih","ski rental","skiverleih","boat rental"],
+    label:"Vermietung", filters:['shop=rental','amenity=car_rental','amenity=bicycle_rental','amenity=boat_rental'] },
+  { names:["pfandhaus","pfandleihe","pawn","pawn shop","pawnshop","pawnbroker"],
+    label:"Pfandhaus", filters:['shop=pawnbroker'] },
+  { names:["vape","vape shop","e zigarette","e-zigarette","vaping","liquids","tabakwaren","tobacconist","tobacco shop","smoke shop","cbd shop","headshop","head shop"],
+    label:"Vape / Tobacco", filters:['shop=tobacco','shop=e-cigarette','shop=cbd'] },
+  { names:["bäckerei café","cafe restaurant","food hall","markthalle","market hall","wochenmarkt","farmers market"],
+    label:"Markt / Markthalle", filters:['amenity=marketplace','shop=marketplace'] },
+  { names:["schreibwaren","schreibwarengeschäft","stationery","stationery store","papeterie","schulbedarf","office supplies"],
+    label:"Schreibwaren", filters:['shop=stationery'] },
+  { names:["geschenke","geschenkartikel","gift shop","gifts","souvenir","souvenir shop","souvenirs"],
+    label:"Geschenke", filters:['shop=gift'] },
+  { names:["banket","verein","vereine","association","club","clubhouse","gemeindehaus","community center","community centre"],
+    label:"Verein", filters:['amenity=community_centre','office=association','office=non_profit'] },
+  { names:["tanzschule","tanzstudio","dance school","dance studio","ballet school","ballettschule"],
+    label:"Tanzschule", filters:['amenity=dance_school','leisure=dance'] },
+  { names:["musikschule","music school","music academy","gesangsschule","klavierunterricht","music lessons"],
+    label:"Musikschule", filters:['amenity=music_school','leisure=music'] },
+  { names:["sprachschule","sprachkurs","language school","language academy","english school"],
+    label:"Sprachschule", filters:['amenity=language_school','office=educational_institution'] },
+  { names:["bauunternehmen","bauunternehmer","baufirma","construction","construction company","construction contractor","general contractor","building contractor","contractor"],
+    label:"Bauunternehmen", filters:['office=construction_company','craft=builder','craft=stonemason','craft=plasterer','craft=scaffolder'] },
+  { names:["schreiben","copywriter","copywriting","texter","content writer","blog writer","ghostwriter"],
+    label:"Texter / Copywriter", filters:['office=copywriter','craft=writer','office=writer'] },
+  { names:["videoproduktion","video production","video producer","film production","filmproduktion","videografer","videographer","filmstudio"],
+    label:"Videoproduktion", filters:['craft=videographer','office=video_production','craft=photographer'] },
+  { names:["yoga","yoga studio","meditation","meditation center","mindfulness","retreat","retreat center"],
+    label:"Yoga / Meditation", filters:['leisure=fitness_centre','sport=yoga','amenity=yoga'] },
+  { names:["barber","barbershop","barber shop","barbier","herrenfriseur","männerfriseur"],
+    label:"Barber", filters:['shop=hairdresser','craft=hairdresser'] }
+];
+
+// US states with their major cities (for the dropdown + city autocomplete).
+const US_CITIES = {
+  "Alabama":["Birmingham","Montgomery","Mobile","Huntsville","Tuscaloosa"],
+  "Alaska":["Anchorage","Fairbanks","Juneau"],
+  "Arizona":["Phoenix","Tucson","Mesa","Chandler","Scottsdale","Glendale","Tempe","Gilbert","Flagstaff"],
+  "Arkansas":["Little Rock","Fort Smith","Fayetteville","Springdale","Jonesboro"],
+  "California":["Los Angeles","San Diego","San Jose","San Francisco","Fresno","Sacramento","Long Beach","Oakland","Bakersfield","Anaheim","Santa Ana","Riverside","Stockton","Irvine","Chula Vista","Fremont","San Bernardino","Modesto","Oxnard","Berkeley","Pasadena","Santa Monica","Palo Alto"],
+  "Colorado":["Denver","Colorado Springs","Aurora","Fort Collins","Lakewood","Thornton","Boulder","Pueblo"],
+  "Connecticut":["Bridgeport","New Haven","Hartford","Stamford","Waterbury","Norwalk"],
+  "Delaware":["Wilmington","Dover","Newark"],
+  "Florida":["Jacksonville","Miami","Tampa","Orlando","St. Petersburg","Hialeah","Tallahassee","Fort Lauderdale","Cape Coral","Pembroke Pines","Hollywood","Gainesville","Coral Springs","Clearwater","West Palm Beach","Pompano Beach","Miami Beach"],
+  "Georgia":["Atlanta","Augusta","Columbus","Savannah","Athens","Macon","Sandy Springs","Roswell"],
+  "Hawaii":["Honolulu","Hilo","Kailua","Kapolei"],
+  "Idaho":["Boise","Meridian","Nampa","Idaho Falls","Pocatello"],
+  "Illinois":["Chicago","Aurora","Rockford","Joliet","Naperville","Springfield","Peoria","Evanston","Champaign"],
+  "Indiana":["Indianapolis","Fort Wayne","Evansville","South Bend","Carmel","Bloomington","Fishers"],
+  "Iowa":["Des Moines","Cedar Rapids","Davenport","Sioux City","Iowa City","Waterloo"],
+  "Kansas":["Wichita","Overland Park","Kansas City","Topeka","Olathe","Lawrence"],
+  "Kentucky":["Louisville","Lexington","Bowling Green","Owensboro","Covington"],
+  "Louisiana":["New Orleans","Baton Rouge","Shreveport","Lafayette","Lake Charles"],
+  "Maine":["Portland","Lewiston","Bangor","South Portland"],
+  "Maryland":["Baltimore","Columbia","Germantown","Silver Spring","Waldorf","Frederick","Annapolis"],
+  "Massachusetts":["Boston","Worcester","Springfield","Cambridge","Lowell","Brockton","New Bedford","Quincy","Somerville"],
+  "Michigan":["Detroit","Grand Rapids","Warren","Sterling Heights","Lansing","Ann Arbor","Flint","Dearborn","Kalamazoo"],
+  "Minnesota":["Minneapolis","Saint Paul","Rochester","Duluth","Bloomington"],
+  "Mississippi":["Jackson","Gulfport","Southaven","Hattiesburg","Biloxi"],
+  "Missouri":["Kansas City","Saint Louis","Springfield","Columbia","Independence"],
+  "Montana":["Billings","Missoula","Great Falls","Bozeman","Butte","Helena"],
+  "Nebraska":["Omaha","Lincoln","Bellevue","Grand Island"],
+  "Nevada":["Las Vegas","Henderson","Reno","North Las Vegas","Sparks","Carson City"],
+  "New Hampshire":["Manchester","Nashua","Concord","Dover"],
+  "New Jersey":["Newark","Jersey City","Paterson","Elizabeth","Edison","Woodbridge","Lakewood","Toms River","Trenton","Atlantic City","Hoboken","Princeton"],
+  "New Mexico":["Albuquerque","Las Cruces","Rio Rancho","Santa Fe","Roswell"],
+  "New York":["New York City","Buffalo","Rochester","Yonkers","Syracuse","Albany","Schenectady","Ithaca"],
+  "North Carolina":["Charlotte","Raleigh","Greensboro","Durham","Winston-Salem","Fayetteville","Cary","Wilmington","Asheville"],
+  "North Dakota":["Fargo","Bismarck","Grand Forks","Minot"],
+  "Ohio":["Columbus","Cleveland","Cincinnati","Toledo","Akron","Dayton","Parma","Canton"],
+  "Oklahoma":["Oklahoma City","Tulsa","Norman","Broken Arrow","Edmond"],
+  "Oregon":["Portland","Eugene","Salem","Gresham","Hillsboro","Beaverton","Bend"],
+  "Pennsylvania":["Philadelphia","Pittsburgh","Allentown","Erie","Reading","Scranton","Bethlehem","Lancaster","Harrisburg"],
+  "Rhode Island":["Providence","Warwick","Cranston","Pawtucket"],
+  "South Carolina":["Charleston","Columbia","North Charleston","Mount Pleasant","Rock Hill","Greenville"],
+  "South Dakota":["Sioux Falls","Rapid City","Aberdeen","Brookings"],
+  "Tennessee":["Nashville","Memphis","Knoxville","Chattanooga","Clarksville","Murfreesboro"],
+  "Texas":["Houston","San Antonio","Dallas","Austin","Fort Worth","El Paso","Arlington","Corpus Christi","Plano","Lubbock","Laredo","Garland","Irving","Amarillo","Frisco","McKinney","Brownsville"],
+  "Utah":["Salt Lake City","West Valley City","Provo","West Jordan","Orem","Sandy"],
+  "Vermont":["Burlington","South Burlington","Rutland","Essex Junction","Montpelier"],
+  "Virginia":["Virginia Beach","Norfolk","Chesapeake","Richmond","Newport News","Alexandria","Hampton","Roanoke"],
+  "Washington":["Seattle","Spokane","Tacoma","Vancouver","Bellevue","Kent","Everett","Renton","Olympia"],
+  "West Virginia":["Charleston","Huntington","Morgantown","Parkersburg","Wheeling"],
+  "Wisconsin":["Milwaukee","Madison","Green Bay","Kenosha","Racine","Appleton","Eau Claire"],
+  "Wyoming":["Cheyenne","Casper","Laramie","Gillette","Rock Springs"]
+};
+
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function fnorm(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,' '); }
+function stemEN(w){
+  const lower = w.toLowerCase();
+  if (lower.length <= 4) return lower;
+  for (const suf of ['ies','ing','ers','er','est','ed','es','ly','y','s']){
+    if (lower.endsWith(suf) && lower.length - suf.length >= 4) return lower.slice(0, -suf.length);
+  }
+  return lower;
+}
+function resolveCategory(input){
+  const q = fnorm(input);
+  if (!q) return null;
+  for (const c of CATEGORIES){
+    for (const n of c.names){
+      if (q === n || q.includes(n) || n.includes(q)) return c;
+    }
+  }
+  const qStems = q.split(/\s+/).filter(w => w.length > 3).map(stemEN);
+  if (!qStems.length) return null;
+  for (const c of CATEGORIES){
+    for (const n of c.names){
+      const nStems = n.split(/\s+/).filter(w => w.length > 3).map(stemEN);
+      for (const a of qStems) for (const b of nStems){ if (a === b) return c; }
+    }
+  }
+  return null;
+}
+
+// --- Geocoding + Overpass -------------------------------------------------
+async function nominatimLookup(q){
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(q)}`;
+  const r = await fetch(url, { headers:{'Accept':'application/json'} });
+  if (!r.ok) throw new Error('Nominatim ' + r.status);
+  const data = await r.json();
+  return data[0] || null;
+}
+async function findLocation(state, city){
+  const parts = [city.trim(), state.trim(), 'USA'].filter(Boolean);
+  if (parts.length <= 1) return null;
+  return await nominatimLookup(parts.join(', '));
+}
+function areaId(place){
+  const id = Number(place.osm_id);
+  if (place.osm_type === 'relation') return 3600000000 + id;
+  if (place.osm_type === 'way') return 2400000000 + id;
+  return null;
+}
+async function overpass(query){
+  let lastErr;
+  for (const ep of OVERPASS_ENDPOINTS){
+    try {
+      const r = await fetch(ep, { method:'POST', body:'data=' + encodeURIComponent(query) });
+      if (!r.ok){ lastErr = new Error(ep + ' ' + r.status); continue; }
+      return await r.json();
+    } catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('All Overpass endpoints failed');
+}
+function selFor(f){ const [k,v] = f.split('='); return v === '*' ? `["${k}"]` : `["${k}"="${v}"]`; }
+function buildCombinedQuery(aid, lat, lon, radiusM, filters, cap = 1500){
+  const parts = [];
+  for (const f of filters){
+    const sel = selFor(f);
+    if (aid){
+      parts.push(`  node${sel}(area.a);`);
+      parts.push(`  way${sel}(area.a);`);
+      parts.push(`  relation${sel}(area.a);`);
+    }
+    if (radiusM > 0){
+      parts.push(`  node${sel}(around:${radiusM},${lat},${lon});`);
+      parts.push(`  way${sel}(around:${radiusM},${lat},${lon});`);
+    }
+  }
+  const head = aid ? `[out:json][timeout:90];\narea(${aid})->.a;\n(` : `[out:json][timeout:90];\n(`;
+  return `${head}\n${parts.join('\n')}\n);\nout center tags ${cap};`;
+}
+function buildBboxQuery(s, w, n, e, filters, cap = 1500){
+  const parts = [];
+  for (const f of filters){
+    const sel = selFor(f);
+    parts.push(`  node${sel}(${s},${w},${n},${e});`);
+    parts.push(`  way${sel}(${s},${w},${n},${e});`);
+  }
+  return `[out:json][timeout:90];\n(\n${parts.join('\n')}\n);\nout center tags ${cap};`;
+}
+async function tileSearch(s, w, n, e, filters, label, fallbackCity, depth = 0){
+  const cap = 1500;
+  let data;
+  try { data = await overpass(buildBboxQuery(s, w, n, e, filters, cap)); }
+  catch(err){ return 0; }
+  const els = data?.elements || [];
+  let added = 0;
+  for (const el of els) if (addElement(el, label, fallbackCity)) added++;
+  if (els.length >= cap * 0.8 && depth < 4){
+    const midLat = (s + n) / 2, midLon = (w + e) / 2;
+    added += await tileSearch(s, w, midLat, midLon, filters, label, fallbackCity, depth+1);
+    added += await tileSearch(s, midLon, midLat, e, filters, label, fallbackCity, depth+1);
+    added += await tileSearch(midLat, w, n, midLon, filters, label, fallbackCity, depth+1);
+    added += await tileSearch(midLat, midLon, n, e, filters, label, fallbackCity, depth+1);
+  }
+  return added;
+}
+
+// --- Staging state --------------------------------------------------------
+const STAGING_KEY = 'call-tracker-staging-v1';
+let finderResults = [];
+let finderSeen = new Set();
+let sidCounter = 0;
+
+function addElement(el, branchLabel, fallbackCity){
+  const oid = (el.type||'x') + '/' + el.id;
+  if (finderSeen.has(oid)) return false;
+  const t = el.tags || {};
+  const name = t.name || t['name:en'] || t['name:de'];
+  if (!name) return false;
+  const street = [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' ');
+  const cityName = t['addr:city'] || t['addr:town'] || t['addr:village'] || fallbackCity || '';
+  const post = t['addr:postcode'] || '';
+  const addr = [street, [cityName, post].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  let website = t.website || t['contact:website'] || t.url || t['contact:url']
+    || t['website:en'] || t['contact:facebook'] || t.facebook || t['contact:instagram'] || t.instagram || '';
+  if (website && !/^https?:\/\//i.test(website)) website = 'https://' + website;
+  const phone = t.phone || t['contact:phone'] || t['contact:mobile'] || t.mobile || t['phone:mobile'] || '';
+  const email = t.email || t['contact:email'] || '';
+  const lat = el.lat ?? el.center?.lat ?? null;
+  const lon = el.lon ?? el.center?.lon ?? null;
+  finderSeen.add(oid);
+  finderResults.push({ _sid: ++sidCounter, name, address: addr, phone, email, website, lat, lon,
+    _hasFullAddr: !!(t['addr:street'] && t['addr:housenumber']) });
+  return true;
+}
+
+// Reverse-geocode rows without a full street address (Nominatim, 1 req/sec).
+async function enrichAddresses(){
+  const targets = finderResults.filter(r => !r._hasFullAddr && r.lat && r.lon);
+  if (!targets.length) return;
+  const base = 'https://nominatim.openstreetmap.org/reverse';
+  for (let i = 0; i < targets.length; i++){
+    const r = targets[i];
+    fStatus(`Improving addresses ${i+1} of ${targets.length} ...`, '', true);
+    try {
+      const url = `${base}?format=json&addressdetails=1&zoom=18&lat=${r.lat}&lon=${r.lon}`;
+      const resp = await fetch(url, { headers:{'Accept':'application/json'} });
+      if (resp.ok){
+        const j = await resp.json();
+        const a = j.address || {};
+        const street = [a.road || a.pedestrian || a.footway, a.house_number].filter(Boolean).join(' ');
+        const city = a.city || a.town || a.village || a.suburb || '';
+        const post = a.postcode || '';
+        const full = [street, [city, post].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+        if (street && full.length > (r.address||'').length) r.address = full;
+      }
+    } catch(e){ /* keep going */ }
+    await sleep(1100);
+    if (i % 5 === 4) renderStaging();
+  }
+  renderStaging();
+}
+
+// --- Status + persistence -------------------------------------------------
+function fStatus(msg, kind, busy){
+  const el = document.getElementById('f-status');
+  el.className = 'finder-status' + (kind ? ' ' + kind : '');
+  el.innerHTML = (busy ? '<span class="spin"></span>' : '') + escapeHtml(msg);
+}
+function persistStaging(){ try { localStorage.setItem(STAGING_KEY, JSON.stringify(finderResults)); } catch(e){} }
+function loadStaging(){
+  try {
+    const raw = localStorage.getItem(STAGING_KEY);
+    finderResults = raw ? JSON.parse(raw) : [];
+  } catch(e){ finderResults = []; }
+  finderResults.forEach(r => { if (r._sid > sidCounter) sidCounter = r._sid; });
+  if (finderResults.length) renderStaging();
+}
+
+// --- Main search ----------------------------------------------------------
+async function runFinderSearch(){
+  const niche = document.getElementById('f-niche').value.trim();
+  const state = document.getElementById('f-state').value;
+  const city  = document.getElementById('f-city').value.trim();
+  const useRadius = Number(document.getElementById('f-radius').value);
+  if (!city){ fStatus('Enter a city.', 'err'); return; }
+
+  const go = document.getElementById('f-go');
+  go.disabled = true;
+  finderResults = []; finderSeen.clear();
+  renderStaging();
+  try {
+    const cat = niche ? resolveCategory(niche) : null;
+    const filters = cat ? cat.filters.slice() : ['office=*','shop=*','craft=*','amenity=restaurant','amenity=cafe'];
+    const label = cat ? cat.label : (niche || 'All');
+    fStatus(`Looking up ${city}, ${state} ...`, '', true);
+
+    const place = await findLocation(state, city);
+    if (!place){ fStatus('Could not find that location. Try another spelling.', 'err'); go.disabled = false; return; }
+    const aid = areaId(place);
+    const lat = Number(place.lat), lon = Number(place.lon);
+    const cityLike = ['city','town','village','suburb','hamlet','municipality','neighbourhood','quarter'];
+    const isCity = cityLike.includes(place.type) || cityLike.includes(place.addresstype) || place.class === 'place';
+    const radiusM = isCity ? useRadius : 0;
+    const fallbackCity = place.address?.city || place.display_name.split(',')[0];
+
+    fStatus(`Searching for ${niche || 'businesses'} in ${city} ...`, '', true);
+    let data = null;
+    try { data = await overpass(buildCombinedQuery(aid, lat, lon, radiusM, filters)); }
+    catch(e){ /* try tiling below */ }
+    const cap = 1500;
+    const initial = data?.elements?.length || 0;
+    if (data?.elements) for (const el of data.elements) addElement(el, label, fallbackCity);
+    renderStaging();
+
+    if (place.boundingbox && initial >= cap * 0.8){
+      fStatus('Large area, scanning in tiles ...', '', true);
+      const [s, n, w, e] = place.boundingbox.map(Number);
+      await tileSearch(s, w, n, e, filters, label, fallbackCity);
+      renderStaging();
+    }
+    if (radiusM && finderResults.length < 25){
+      for (const rad of [50000, 100000]){
+        try {
+          const more = await overpass(buildCombinedQuery(null, lat, lon, rad, filters));
+          if (more?.elements) for (const el of more.elements) addElement(el, label, fallbackCity);
+          if (finderResults.length >= 30) break;
+        } catch(err){ /* keep going */ }
+      }
+      renderStaging();
+    }
+
+    if (finderResults.length){
+      await enrichAddresses();
+      fStatus(`Found ${finderResults.length} businesses. Edit or remove rows, then add them to your call list.`, 'ok');
+    } else {
+      fStatus('No results. Try a bigger city, a different niche, or a larger radius.', 'err');
+    }
+  } catch(e){
+    fStatus('Error: ' + e.message, 'err');
+  } finally {
+    go.disabled = false;
+    persistStaging();
+  }
+}
+
+// --- Staging table render + edit ------------------------------------------
+function renderStaging(){
+  const wrap = document.getElementById('staging-wrap');
+  const body = document.getElementById('staging-body');
+  const count = document.getElementById('staging-count');
+  if (!finderResults.length){ wrap.style.display = 'none'; body.innerHTML = ''; return; }
+  wrap.style.display = 'block';
+  count.textContent = `${finderResults.length} business${finderResults.length === 1 ? '' : 'es'}`;
+  document.getElementById('f-addall').textContent = `Add ${finderResults.length} to ${terms().uncontacted}`;
+  body.innerHTML = finderResults.map(r => {
+    const f = (field, ph) => `<input type="text" value="${escapeHtml(r[field] || '')}" placeholder="${ph}" oninput="stagingEdit(${r._sid}, '${field}', this.value)" />`;
+    return `<tr>
+      <td>${f('name','name')}</td>
+      <td>${f('email','email')}</td>
+      <td>${f('address','address')}</td>
+      <td>${f('website','website')}</td>
+      <td>${f('phone','phone')}</td>
+      <td class="col-x"><button class="row-remove" title="Remove" onclick="stagingRemove(${r._sid})">&minus;</button></td>
+    </tr>`;
+  }).join('');
+}
+function stagingEdit(sid, field, val){
+  const r = finderResults.find(x => x._sid === sid);
+  if (r){ r[field] = val; persistStaging(); }
+}
+function stagingRemove(sid){
+  finderResults = finderResults.filter(x => x._sid !== sid);
+  persistStaging();
+  renderStaging();
+}
+function clearStaging(){
+  finderResults = []; finderSeen.clear();
+  persistStaging();
+  renderStaging();
+  fStatus('', '');
+}
+function addAllStaged(){
+  if (!finderResults.length) return;
+  const digits = s => (s || '').replace(/\D/g, '');
+  const phoneKeys = new Set(leads.map(l => digits(l.phone)).filter(p => p.length >= 7));
+  const nameKeys = new Set(leads.map(l => (l.name||'').toLowerCase().trim() + '|' + (l.address||'').toLowerCase().trim()));
+  let added = 0, skipped = 0, i = 0;
+  const toAdd = [];
+  for (const r of finderResults){
+    const pk = digits(r.phone);
+    const nk = (r.name||'').toLowerCase().trim() + '|' + (r.address||'').toLowerCase().trim();
+    if ((pk.length >= 7 && phoneKeys.has(pk)) || nameKeys.has(nk)){ skipped++; continue; }
+    if (pk.length >= 7) phoneKeys.add(pk);
+    nameKeys.add(nk);
+    toAdd.push({
+      id: newId(i++),
+      name: r.name,
+      phone: r.phone || MISSING,
+      website: r.website || MISSING,
+      email: r.email || MISSING,
+      address: r.address || '',
+      site: 'unknown',
+      status: 'pending',
+      note: '',
+      callback: '',
+    });
+    added++;
+  }
+  leads = leads.concat(toAdd);
+  persist();
+  finderResults = []; finderSeen.clear();
+  persistStaging();
+  renderStaging();
+  render();
+  fStatus(`Added ${added} to ${terms().uncontacted}${skipped ? `, skipped ${skipped} already in your list` : ''}.`, 'ok');
+}
+
+// --- Finder init ----------------------------------------------------------
+function toggleFinder(){
+  const f = document.getElementById('finder');
+  const open = f.style.display === 'none';
+  f.style.display = open ? 'block' : 'none';
+  if (open) document.getElementById('f-niche').focus();
+}
+(function initFinder(){
+  const stateSel = document.getElementById('f-state');
+  stateSel.innerHTML = '<option value="">Select state</option>' +
+    Object.keys(US_CITIES).map(s => `<option value="${s}">${s}</option>`).join('');
+  const updateCities = () => {
+    const cities = US_CITIES[stateSel.value] || [];
+    document.getElementById('city-suggest').innerHTML = cities.map(c => `<option value="${c}"></option>`).join('');
+  };
+  stateSel.addEventListener('change', updateCities);
+  // Niche suggestions: a curated set of common English terms.
+  const nicheTerms = ['dentist','plumber','electrician','roofer','painter','hvac','landscaper','restaurant','cafe','bar','hair salon','barber','gym','chiropractor','lawyer','accountant','real estate agent','insurance agent','auto repair','car dealer','veterinarian','pharmacy','florist','bakery','cleaning service','moving company','locksmith','photographer','catering','tattoo','nail salon','massage','optician','pet store','jeweler','hotel','contractor','tax advisor','marketing agency'];
+  document.getElementById('niche-suggest').innerHTML = nicheTerms.map(t => `<option value="${t}"></option>`).join('');
+  document.getElementById('f-niche').addEventListener('keydown', e => { if (e.key === 'Enter') runFinderSearch(); });
+  document.getElementById('f-city').addEventListener('keydown', e => { if (e.key === 'Enter') runFinderSearch(); });
+  loadStaging();
+})();
+
+applyModeChrome();
+loadLeads();
+</script>
+</body>
+</html>
