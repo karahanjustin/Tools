@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tools Hub // Potsdam Media</title>
+<style>
+  :root {
+    --bg: #070a0f;
+    --bg2: #0b1119;
+    --panel: rgba(17, 26, 38, 0.72);
+    --line: rgba(80, 130, 170, 0.18);
+    --line-bright: rgba(47, 217, 255, 0.55);
+    --text: #e7f1f8;
+    --muted: #7d92a6;
+    --accent: #2fd9ff;
+    --accent2: #5b8cff;
+    --good: #3ce29a;
+    --warn: #ffb454;
+    --radius: 16px;
+    font-synthesis: none;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(91,140,255,0.10), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(47,217,255,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* faint HUD grid */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  /* header */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    width: 46px; height: 46px; flex: none;
+    border: 1px solid var(--line-bright);
+    border-radius: 12px;
+    display: grid; place-items: center;
+    background: linear-gradient(160deg, rgba(47,217,255,0.16), rgba(91,140,255,0.05));
+    box-shadow: 0 0 28px rgba(47,217,255,0.18), inset 0 0 14px rgba(47,217,255,0.10);
+  }
+  .logo svg { width: 24px; height: 24px; }
+  h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 13px; letter-spacing: 0.08em; margin-top: 3px; }
+
+  .status {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 11.5px; color: var(--muted);
+    text-align: right; line-height: 1.7;
+  }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--good); box-shadow: 0 0 8px var(--good); margin-right: 6px; }
+  .status b { color: var(--good); font-weight: 600; }
+
+  /* section label */
+  .seclabel {
+    display: flex; align-items: center; gap: 12px;
+    margin: 38px 0 18px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .seclabel::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* tool grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    backdrop-filter: blur(8px);
+  }
+  .card.live::after {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(var(--accent), var(--accent2));
+    box-shadow: 0 0 14px var(--accent);
+  }
+  .card.live:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-bright);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(47,217,255,0.10);
+  }
+  .card.soon { opacity: 0.5; cursor: default; }
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: rgba(47,217,255,0.08);
+    border: 1px solid var(--line);
+    color: var(--accent);
+  }
+  .icon svg { width: 21px; height: 21px; }
+  .badge {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px;
+  }
+  .badge.on { color: var(--good); border: 1px solid rgba(60,226,154,0.35); background: rgba(60,226,154,0.08); }
+  .badge.off { color: var(--warn); border: 1px solid rgba(255,180,84,0.30); background: rgba(255,180,84,0.07); }
+  .card h3 { font-size: 17px; font-weight: 650; margin-bottom: 6px; letter-spacing: 0.01em; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .card .go {
+    margin-top: 16px; font-size: 12.5px; color: var(--accent);
+    font-weight: 600; letter-spacing: 0.04em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .card.live:hover .go { gap: 10px; }
+
+  /* schedule panel */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px;
+    backdrop-filter: blur(8px);
+  }
+  .panel-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .panel-head .icon { color: var(--accent2); }
+  .panel-head h3 { font-size: 18px; font-weight: 650; }
+  .panel-head .hint { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  #cal-inline { width: 100%; min-height: 600px; border-radius: 10px; overflow: hidden; }
+
+  .connect {
+    text-align: center; padding: 40px 20px;
+    border: 1px dashed var(--line); border-radius: 12px;
+    background: rgba(91,140,255,0.04);
+  }
+  .connect h4 { font-size: 16px; margin-bottom: 10px; }
+  .connect p { color: var(--muted); font-size: 13.5px; line-height: 1.6; max-width: 520px; margin: 0 auto 8px; }
+  .connect code {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    background: rgba(47,217,255,0.10); color: var(--accent);
+    padding: 2px 7px; border-radius: 6px; font-size: 12.5px;
+  }
+  .steps { list-style: none; max-width: 460px; margin: 18px auto 0; text-align: left; }
+  .steps li {
+    font-size: 13px; color: var(--muted); padding: 8px 0 8px 30px; position: relative;
+    border-top: 1px solid var(--line);
+  }
+  .steps li:first-child { border-top: none; }
+  .steps li b { color: var(--text); font-weight: 600; }
+  .steps li::before {
+    content: counter(s); counter-increment: s;
+    position: absolute; left: 0; top: 7px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(47,217,255,0.10); color: var(--accent);
+    font-family: "SF Mono", ui-monospace, monospace; font-size: 11px;
+    display: grid; place-items: center;
+  }
+  .steps { counter-reset: s; }
+
+  footer {
+    margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    color: var(--muted); font-size: 12px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.04em;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 32px 16px 48px; }
+    h1 { font-size: 21px; }
+    .status { text-align: left; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2fd9ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="2.4"/>
+            <circle cx="5" cy="5" r="1.8"/><circle cx="19" cy="5" r="1.8"/>
+            <circle cx="5" cy="19" r="1.8"/><circle cx="19" cy="19" r="1.8"/>
+            <path d="M6.5 6.5l4 4M17.5 6.5l-4 4M6.5 17.5l4-4M17.5 17.5l-4-4"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Tools <span>Hub</span></h1>
+          <div class="sub">Potsdam Media // Command Hub</div>
+        </div>
+      </div>
+      <div class="status">
+        <div><span class="dot"></span><b>SYSTEME ONLINE</b></div>
+        <div id="clock">--:--:--</div>
+      </div>
+    </header>
+
+    <div class="seclabel">Werkzeuge</div>
+    <div class="grid">
+
+      <a class="card live" href="https://potsdam-media.de/leads/">
+        <div class="card-top">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <span class="badge on">Live</span>
+        </div>
+        <h3>Call Tracker</h3>
+        <p>Lead-Finder und Anruf-Tracking fuer die Kalt-Akquise. Liste abarbeiten, Ergebnisse loggen.</p>
+        <span class="go">Oeffnen &rarr;</span>
+      </a>
+
+      <a class="card live" href="#schedule">
+        <div class="card-top">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+              <path d="M9 16l2 2 4-4"/>
+            </svg>
+          </div>
+          <span class="badge on">Live</span>
+        </div>
+        <h3>Terminplaner</h3>
+        <p>Geteilter Kalender. Hier bucht die Cold-Callerin die Demo-Termine, Zeitzonen und Erinnerungen automatisch.</p>
+        <span class="go">Zum Kalender &rarr;</span>
+      </a>
+
+      <div class="card soon">
+        <div class="card-top">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+            </svg>
+          </div>
+          <span class="badge off">Bald</span>
+        </div>
+        <h3>Lead Finder</h3>
+        <p>Qualifizierte US-Handwerksbetriebe finden und in die Anruf-Liste schieben.</p>
+      </div>
+
+      <div class="card soon">
+        <div class="card-top">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20V10M18 20V4M6 20v-4"/>
+            </svg>
+          </div>
+          <span class="badge off">Bald</span>
+        </div>
+        <h3>Pipeline</h3>
+        <p>Eine Quelle der Wahrheit: angerufen, gebucht, demot, geschlossen, live.</p>
+      </div>
+
+      <div class="card soon">
+        <div class="card-top">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16v12H5.2L4 18z"/><path d="M8 9h8M8 12h5"/>
+            </svg>
+          </div>
+          <span class="badge off">Bald</span>
+        </div>
+        <h3>Demo Studio</h3>
+        <p>Die KI-Empfang-Demo, die in Calls live aufs Handy des Interessenten textet.</p>
+      </div>
+
+    </div>
+
+    <div class="seclabel" id="schedule">Terminplaner</div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Demo-Termine</h3>
+          <div class="hint">Geteilt mit der Cold-Callerin. Buchungen landen automatisch in deinem Kalender.</div>
+        </div>
+      </div>
+
+      <div id="cal-inline"></div>
+
+      <div class="connect" id="cal-connect">
+        <h4>Kalender noch nicht verbunden</h4>
+        <p>Sobald dein Cal.com-Link drinsteht, erscheint hier der eingebettete Buchungskalender. So aktivierst du ihn:</p>
+        <ol class="steps">
+          <li>Kostenloses Konto auf <b>cal.com</b> anlegen</li>
+          <li>Event-Typ <b>"15 Min Demo"</b> erstellen, Cold-Callerin als Mit-Bearbeiterin einladen</li>
+          <li>Deinen Link (z.B. <code>homeservicereply/demo</code>) Claude geben</li>
+          <li>Claude setzt <code>CAL_LINK</code> und der Kalender geht live</li>
+        </ol>
+      </div>
+    </div>
+
+    <footer>
+      <span>Potsdam Media // internes Werkzeug-Dach</span>
+      <span>HomeServiceReply Ops</span>
+    </footer>
+
+  </div>
+
+<script>
+  /* ===== Konfiguration =====
+     Sobald der Cal.com-Link da ist, hier eintragen, z.B.:
+     const CAL_LINK = "homeservicereply/demo";
+  */
+  const CAL_LINK = "";
+
+  // Uhr (HUD)
+  function tick() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, "0");
+    const el = document.getElementById("clock");
+    if (el) el.textContent = p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Kalender: Cal.com inline embed, nur wenn CAL_LINK gesetzt ist
+  (function () {
+    const mount = document.getElementById("cal-inline");
+    const connect = document.getElementById("cal-connect");
+    if (!CAL_LINK) { mount.style.display = "none"; return; }
+    connect.style.display = "none";
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+    Cal("init", { origin: "https://cal.com" });
+    Cal("inline", { elementOrSelector: "#cal-inline", calLink: CAL_LINK, layout: "month_view" });
+  })();
+</script>
+</body>
+</html>
