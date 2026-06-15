@@ -1,33 +1,36 @@
 # Tools Hub
 
-Internes Werkzeug-Dach von Potsdam Media. Eine vernetzte Oberflaeche, die zu allen
-Tools fuehrt und den geteilten Demo-Terminplaner enthaelt.
+Internal tooling hub for Potsdam Media. An interconnected interface that links every tool
+and holds the shared demo scheduler.
 
-Live: https://potsdam-media.de/Tools/
+Live: https://tools.homeservicereply.com/
 
 ## Tools
 
 - **Call Tracker** (live) -> https://potsdam-media.de/leads/
-- **Terminplaner** (live) -> Cal.com-Einbettung im Hub
-- Lead Finder, Pipeline, Demo Studio -> geplant
+- **Scheduler** (live) -> Cal.com embed inside the hub
+- Lead Finder, Pipeline, Demo Studio -> planned
 
-## Kalender verbinden
+## Connect the calendar
 
-Der Terminplaner bettet Cal.com ein (geteilt, Zeitzonen + Erinnerungen automatisch).
-Zum Aktivieren in `index.html` die Konstante setzen:
+The scheduler embeds Cal.com (shared, time zones + reminders handled automatically).
+To activate it, set the constant in `index.html`:
 
 ```js
-const CAL_LINK = "homeservicereply/demo";  // dein cal.com user/event
+const CAL_LINK = "homeservicereply/demo";  // your cal.com user/event
 ```
 
-Solange `CAL_LINK` leer ist, zeigt der Hub eine Anleitung statt des Kalenders.
+While `CAL_LINK` is empty, the hub shows setup instructions instead of the calendar.
 
-## Neues Tool hinzufuegen
+## Add a tool
 
-In `index.html` im `.grid` eine weitere `.card live` mit Link ergaenzen, oder eine
-`.card soon` als Platzhalter. Single-file, kein Build, kein Backend.
+In `index.html`, add another `.card live` with a link inside `.grid`, or a `.card soon`
+placeholder. Single file, no build, no backend.
 
 ## Deployment
 
-GitHub Pages aus `main`, Root. Custom Domain (potsdam-media.de) wird vom User-Pages-Setup
-geerbt, daher liegt der Hub unter `/Tools/`.
+GitHub Pages from `main`, root. Custom domain via the `CNAME` file
+(`tools.homeservicereply.com`).
+
+DNS at the registrar (Porkbun): a `CNAME` record, host `tools`, target
+`karahanjustin.github.io`.
