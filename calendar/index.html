@@ -190,8 +190,9 @@
     } catch (e) { setStatus("Config error", "warn"); }
 
     calendar = new FullCalendar.Calendar($("calendar"), {
-      initialView: "dayGridMonth",
-      headerToolbar: { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek" },
+      initialView: "timeGridWeek",
+      firstDay: 1,
+      headerToolbar: { left: "prev,next today", center: "title", right: "" },
       height: "100%", nowIndicator: true, selectable: true, selectMirror: true, editable: true,
       dayMaxEvents: true, slotMinTime: "06:00:00", slotMaxTime: "23:00:00", scrollTime: "08:00:00",
       select: info => openNew(info.start, info.end, info.allDay),
