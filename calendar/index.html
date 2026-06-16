@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calendar // HomeServiceReply</title>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<style>
+  :root {
+    --bg: #070a0f;
+    --panel: rgba(17, 26, 38, 0.72);
+    --line: rgba(80, 130, 170, 0.18);
+    --line-bright: rgba(47, 217, 255, 0.55);
+    --text: #e7f1f8;
+    --muted: #7d92a6;
+    --accent: #2fd9ff;
+    --accent2: #5b8cff;
+    --good: #3ce29a;
+    --danger: #ff6b6b;
+
+    /* FullCalendar dark theme */
+    --fc-border-color: rgba(80, 130, 170, 0.18);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(17, 26, 38, 0.45);
+    --fc-today-bg-color: rgba(47, 217, 255, 0.10);
+    --fc-button-text-color: #e7f1f8;
+    --fc-button-bg-color: rgba(47, 217, 255, 0.10);
+    --fc-button-border-color: rgba(80, 130, 170, 0.30);
+    --fc-button-hover-bg-color: rgba(47, 217, 255, 0.20);
+    --fc-button-hover-border-color: var(--accent);
+    --fc-button-active-bg-color: rgba(47, 217, 255, 0.30);
+    --fc-button-active-border-color: var(--accent);
+    --fc-event-bg-color: #2fd9ff;
+    --fc-event-border-color: #2fd9ff;
+    --fc-event-text-color: #06121a;
+    --fc-list-event-hover-bg-color: rgba(47, 217, 255, 0.08);
+    --fc-now-indicator-color: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(91,140,255,0.10), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(47,217,255,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    display: flex; align-items: center; gap: 18px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .back {
+    color: var(--muted); text-decoration: none; font-size: 13px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px;
+    transition: all 0.15s ease;
+  }
+  .back:hover { color: var(--accent); border-color: var(--line-bright); }
+  .topbar h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.04em; }
+  .topbar h1 span { color: var(--accent); }
+  .pill {
+    margin-left: auto; font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 11px; color: var(--warn, #ffb454); letter-spacing: 0.06em;
+    border: 1px solid rgba(255,180,84,0.30); background: rgba(255,180,84,0.07);
+    padding: 5px 11px; border-radius: 999px;
+  }
+
+  .cal-wrap { height: calc(100vh - 130px); padding: 18px 24px 28px; max-width: 1240px; margin: 0 auto; }
+  #calendar { height: 100%; }
+
+  .fc .fc-toolbar-title { font-size: 1.25rem; font-weight: 650; }
+  .fc .fc-button { text-transform: capitalize; font-weight: 500; box-shadow: none !important; }
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-daygrid-day-number,
+  .fc .fc-timegrid-axis-cushion,
+  .fc .fc-timegrid-slot-label-cushion,
+  .fc .fc-list-day-text,
+  .fc .fc-list-day-side-text { color: var(--text); text-decoration: none; }
+  .fc-theme-standard .fc-list-day-cushion { background: var(--panel); }
+  .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--accent); font-weight: 700; }
+  .fc-event { cursor: pointer; font-weight: 600; }
+  .fc .fc-list-empty { background: transparent; color: var(--muted); }
+
+  /* modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(3,6,10,0.7);
+    display: grid; place-items: center; z-index: 50; padding: 20px;
+  }
+  .overlay.hidden { display: none; }
+  .modal {
+    width: 100%; max-width: 440px;
+    background: #0d1521; border: 1px solid var(--line-bright);
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  }
+  .modal h3 { font-size: 17px; margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.03em; }
+  .field input, .field textarea {
+    width: 100%; background: rgba(17,26,38,0.8); color: var(--text);
+    border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px;
+    font-size: 14px; font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .row2 { display: flex; gap: 12px; }
+  .row2 .field { flex: 1; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 22px; align-items: center; }
+  .modal-actions button {
+    border: 1px solid var(--line); background: rgba(47,217,255,0.06); color: var(--text);
+    border-radius: 9px; padding: 10px 16px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s ease; font-family: inherit;
+  }
+  .modal-actions button:hover { border-color: var(--line-bright); }
+  .btn-primary { background: var(--accent) !important; color: #06121a !important; border-color: var(--accent) !important; }
+  .btn-danger { color: var(--danger) !important; border-color: rgba(255,107,107,0.35) !important; background: rgba(255,107,107,0.07) !important; margin-right: auto; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="../">&larr; Tools Hub</a>
+    <h1>Calendar<span>.</span></h1>
+    <span class="pill" id="syncpill">Local only &middot; not shared yet</span>
+  </div>
+
+  <div class="cal-wrap">
+    <div id="calendar"></div>
+  </div>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="modal">
+      <h3 id="m-title">New event</h3>
+      <div class="field">
+        <label for="f-title">Title</label>
+        <input id="f-title" type="text" placeholder="e.g. Demo - ABC Plumbing" />
+      </div>
+      <div class="field">
+        <label for="f-date">Date</label>
+        <input id="f-date" type="date" />
+      </div>
+      <div class="row2">
+        <div class="field"><label for="f-start">Start</label><input id="f-start" type="time" /></div>
+        <div class="field"><label for="f-end">End</label><input id="f-end" type="time" /></div>
+      </div>
+      <div class="field">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" placeholder="Phone, lead info, objections..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-danger" id="f-delete">Delete</button>
+        <button id="f-cancel">Cancel</button>
+        <button class="btn-primary" id="f-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== Storage layer (swap to a shared backend later) =====
+  const Store = {
+    KEY: "hsr_calendar_events_v1",
+    load() { try { return JSON.parse(localStorage.getItem(this.KEY) || "[]"); } catch (e) { return []; } },
+    save(events) { localStorage.setItem(this.KEY, JSON.stringify(events)); }
+  };
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, "0");
+  const toDateVal = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const toTimeVal = d => pad(d.getHours()) + ":" + pad(d.getMinutes());
+
+  let editingId = null;
+  const overlay = $("overlay");
+
+  const calendar = new FullCalendar.Calendar($("calendar"), {
+    initialView: "dayGridMonth",
+    headerToolbar: {
+      left: "prev,next today",
+      center: "title",
+      right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+    },
+    height: "100%",
+    nowIndicator: true,
+    selectable: true,
+    selectMirror: true,
+    editable: true,
+    dayMaxEvents: true,
+    slotMinTime: "06:00:00",
+    slotMaxTime: "23:00:00",
+    scrollTime: "08:00:00",
+    events: Store.load(),
+    select: info => openNew(info.start, info.end, info.allDay),
+    eventClick: info => openEdit(info.event),
+    eventDrop: persist,
+    eventResize: persist
+  });
+  calendar.render();
+
+  function openNew(start, end, allDay) {
+    editingId = null;
+    $("m-title").textContent = "New event";
+    $("f-title").value = "";
+    $("f-notes").value = "";
+    $("f-date").value = toDateVal(start);
+    if (allDay) {
+      $("f-start").value = "10:00";
+      $("f-end").value = "10:30";
+    } else {
+      $("f-start").value = toTimeVal(start);
+      $("f-end").value = toTimeVal(end || new Date(start.getTime() + 30 * 60000));
+    }
+    $("f-delete").style.display = "none";
+    show();
+  }
+
+  function openEdit(ev) {
+    editingId = ev.id;
+    const s = ev.start;
+    const e = ev.end || new Date(s.getTime() + 30 * 60000);
+    $("m-title").textContent = "Edit event";
+    $("f-title").value = ev.title;
+    $("f-notes").value = ev.extendedProps.notes || "";
+    $("f-date").value = toDateVal(s);
+    $("f-start").value = toTimeVal(s);
+    $("f-end").value = toTimeVal(e);
+    $("f-delete").style.display = "inline-block";
+    show();
+  }
+
+  function show() { overlay.classList.remove("hidden"); setTimeout(() => $("f-title").focus(), 30); }
+  function hide() { overlay.classList.add("hidden"); editingId = null; }
+
+  function persist() {
+    const evs = calendar.getEvents().map(e => ({
+      id: e.id,
+      title: e.title,
+      start: e.start ? e.start.toISOString() : null,
+      end: e.end ? e.end.toISOString() : null,
+      allDay: e.allDay,
+      extendedProps: { notes: e.extendedProps.notes || "" }
+    }));
+    Store.save(evs);
+  }
+
+  $("f-save").onclick = () => {
+    const title = ($("f-title").value || "").trim() || "(no title)";
+    const date = $("f-date").value;
+    if (!date) return;
+    const st = $("f-start").value || "10:00";
+    const en = $("f-end").value;
+    const start = new Date(date + "T" + st);
+    let end = en ? new Date(date + "T" + en) : new Date(start.getTime() + 30 * 60000);
+    if (end <= start) end = new Date(start.getTime() + 30 * 60000);
+
+    if (editingId) {
+      const ev = calendar.getEventById(editingId);
+      ev.setProp("title", title);
+      ev.setExtendedProp("notes", $("f-notes").value);
+      ev.setDates(start, end, { allDay: false });
+    } else {
+      calendar.addEvent({
+        id: String(Date.now()) + "-" + Math.floor(Math.random() * 1000),
+        title, start, end, allDay: false,
+        extendedProps: { notes: $("f-notes").value }
+      });
+    }
+    persist();
+    hide();
+  };
+
+  $("f-delete").onclick = () => {
+    if (editingId) {
+      const ev = calendar.getEventById(editingId);
+      if (ev) ev.remove();
+      persist();
+    }
+    hide();
+  };
+
+  $("f-cancel").onclick = hide;
+  overlay.onclick = e => { if (e.target === overlay) hide(); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+</script>
+</body>
+</html>
