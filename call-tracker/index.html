@@ -3,47 +3,44 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Call Tracker</title>
+<title>Lead Management</title>
 <style>
   :root {
-    --bg: #0b0b12;
-    --bg-2: #11111a;
-    --surface: #16161f;
-    --surface-2: #1d1d28;
-    --surface-hover: #232330;
-    --border: #2a2a38;
-    --border-strong: #3a3a4d;
-    --text: #ececf2;
-    --text-2: #a0a0ad;
-    --text-3: #6b6b7a;
+    --bg: #f7f7f8;
+    --bg-2: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1f1f4;
+    --surface-hover: #f1f1f4;
+    --border: #e8e8ec;
+    --border-strong: #d7d7dd;
+    --text: #18181b;
+    --text-2: #52525b;
+    --text-3: #9a9aa5;
 
-    --accent: #8b5cf6;
-    --accent-2: #a78bfa;
-    --accent-soft: rgba(139, 92, 246, 0.12);
+    --accent: #2563eb;
+    --accent-2: #2563eb;
+    --accent-soft: rgba(37, 99, 235, 0.12);
 
-    --success: #4ade80;
-    --success-bg: rgba(74, 222, 128, 0.12);
-    --warning: #fbbf24;
-    --warning-bg: rgba(251, 191, 36, 0.12);
-    --danger: #f87171;
-    --danger-bg: rgba(248, 113, 113, 0.12);
-    --info: #60a5fa;
-    --info-bg: rgba(96, 165, 250, 0.12);
+    --success: #16a34a;
+    --success-bg: rgba(22, 163, 74, 0.10);
+    --warning: #d97706;
+    --warning-bg: rgba(217, 119, 6, 0.10);
+    --danger: #dc2626;
+    --danger-bg: rgba(220, 38, 38, 0.08);
+    --info: #2563eb;
+    --info-bg: rgba(37, 99, 235, 0.10);
 
-    --r-sm: 6px;
-    --r-md: 10px;
+    --r-sm: 8px;
+    --r-md: 12px;
     --r-lg: 14px;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+    --shadow-sm: 0 1px 2px rgba(24,24,27,0.05);
+    --shadow-md: 0 8px 24px rgba(24,24,27,0.10);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
-    background:
-      radial-gradient(900px 500px at 80% -10%, rgba(139, 92, 246, 0.12), transparent 60%),
-      radial-gradient(700px 400px at -10% 10%, rgba(96, 165, 250, 0.08), transparent 60%),
-      var(--bg);
+    background: var(--bg);
     color: var(--text);
     margin: 0;
     padding: 2.5rem 1.5rem 4rem;
@@ -58,11 +55,8 @@
     margin-bottom: 2rem; flex-wrap: wrap; gap: 12px;
   }
   h1 {
-    font-size: 28px; font-weight: 600; margin: 0;
-    background: linear-gradient(135deg, var(--text) 0%, var(--accent-2) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 26px; font-weight: 660; margin: 0;
+    color: var(--text);
     letter-spacing: -0.02em;
   }
   .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -87,10 +81,10 @@
   button:hover { background: var(--surface-hover); border-color: var(--border-strong); }
   button:active { transform: translateY(1px); }
   button.primary {
-    background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
-    border-color: transparent; color: white; font-weight: 500;
+    background: var(--accent);
+    border-color: transparent; color: white; font-weight: 600;
   }
-  button.primary:hover { filter: brightness(1.1); }
+  button.primary:hover { background: #1d4ed8; border-color: transparent; }
   button.danger { color: var(--danger); border-color: rgba(248,113,113,0.25); }
   button.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
   button.small { font-size: 12px; padding: 6px 12px; }
@@ -106,10 +100,10 @@
   }
   .mode-btn:hover { background: var(--surface-hover); border-color: transparent; }
   .mode-btn.active {
-    background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+    background: var(--accent);
     color: #fff;
   }
-  .mode-btn.active:hover { filter: brightness(1.1); background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%); }
+  .mode-btn.active:hover { background: #1d4ed8; }
 
   /* Stats grid */
   .stats {
@@ -249,7 +243,7 @@
     margin-top: 8px; font-size: 11px; color: var(--text-2);
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   }
-  .callback-input { font-size: 11px; padding: 3px 6px; height: 26px; color-scheme: dark; }
+  .callback-input { font-size: 11px; padding: 3px 6px; height: 26px; }
   .icon-btn {
     font-size: 12px; padding: 0 12px; height: 30px;
     color: var(--text-2); background: transparent;
@@ -345,7 +339,7 @@
 
 <div class="header-row">
   <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-    <h1 id="app-title">Call Tracker</h1>
+    <h1 id="app-title">Lead Management</h1>
     <div class="mode-switch">
       <button id="mode-call" class="mode-btn" onclick="setMode('call')">Calls</button>
       <button id="mode-email" class="mode-btn" onclick="setMode('email')">Email</button>
@@ -481,8 +475,8 @@ const STATUS_LABELS = {
   email: { pending:'Not sent',   no_answer:'No reply',  not_int:'Not interested', interested:'Replied',    closed:'Closed' },
 };
 const MODE_TERMS = {
-  call:  { called:'Called', interested:'Interested', dateLabel:'Callback',  dueNoun:'callback',  uncontacted:'Un-called', verb:'calling',  title:'Call Tracker' },
-  email: { called:'Sent',   interested:'Replied',    dateLabel:'Follow-up', dueNoun:'follow-up', uncontacted:'Not-sent',  verb:'emailing', title:'Email Tracker' },
+  call:  { called:'Called', interested:'Interested', dateLabel:'Callback',  dueNoun:'callback',  uncontacted:'Un-called', verb:'calling',  title:'Lead Management' },
+  email: { called:'Sent',   interested:'Replied',    dateLabel:'Follow-up', dueNoun:'follow-up', uncontacted:'Not-sent',  verb:'emailing', title:'Lead Management' },
 };
 function statusConfig() {
   const m = STATUS_LABELS[mode];
